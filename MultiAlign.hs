@@ -1,5 +1,9 @@
 {-# LANGUAGE QuasiQuotes #-}
 
+-- | TODO we need to fix the start symbol (not that important, from whatever
+-- non-terminal we read the final result, make said non-terminal the start
+-- symbol.
+
 module Main where
 
 import BioInf.GrammarProducts
@@ -10,6 +14,12 @@ main = return ()
 
 {-
 test = [grammar|
+
+-- "-" aligns with terminals (doesn't introduce a new terminal hole), but
+-- modifies the vectorial terminal in the respective dimension to not advance.
+-- data VC <ynm> <xs>, where ynm = Yes|No|Maybe. Yes advances, No doesn't
+-- advance, maybe produces two cases, one advancing, one not. And since these
+-- are empty data decls, they are optimized away during compilation.
 
 X -> X u
 X -> Y u
