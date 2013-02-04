@@ -87,3 +87,23 @@ Y ->  X-  |  X-  |  Y-  |  Y-
 Y     X-  |  Y-  |  X-  |  Y-
 
 -}
+
+
+
+{-
+
+N: F^[0..2 | 3]  -- these are three non-terminals, indexed by ints. the (| 3) "mod 3" operator leads to wrap-around
+T: u v w .
+
+F^i  ->  F^i u v w  |  F^i . . .    -- one should remove productions where the RHS contains only "delete" terminals
+F^i  ->  F^(i+1) . v w
+F^i  ->  F^(i+2) . . w
+
+===
+
+N: P
+T: a .
+
+P  ->  P a | P .
+
+-}
