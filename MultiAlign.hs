@@ -21,6 +21,9 @@ test = [grammar|
 -- advance, maybe produces two cases, one advancing, one not. And since these
 -- are empty data decls, they are optimized away during compilation.
 
+N: X Y
+T: u -
+
 X -> X u
 X -> Y u
 

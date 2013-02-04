@@ -1,3 +1,14 @@
+{-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE UndecidableInstances #-}
+{-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE DeriveFoldable #-}
+{-# LANGUAGE StandaloneDeriving #-}
+{-# LANGUAGE TypeOperators #-}
+{-# LANGUAGE EmptyDataDecls #-}
+{-# LANGUAGE KindSignatures #-}
+{-# LANGUAGE DataKinds #-}
 {-# LANGUAGE NoMonomorphismRestriction #-}
 {-# LANGUAGE GADTs #-}
 
@@ -8,68 +19,88 @@ import qualified Language.Haskell.TH as TH
 import Text.Trifecta
 import Control.Applicative
 import Data.Semigroup
+import qualified Data.Set as S
+import Data.Set (Set(..))
+import GHC.TypeLits
+import Text.Printf
+import Data.Foldable as F
+import Control.Applicative
+import Control.Lens
+import Text.Trifecta.Result
+import Text.PrettyPrint.ANSI.Leijen as Pretty hiding (line, (<>), (<$>), empty, string, char)
+import System.IO (stdout)
+import System.IO.Unsafe (unsafePerformIO)
 
 
 
--- | Grammars are represented much like in formal theory as a tuple. We
--- actually use attribute grammars (Knuth, 1968) to add algebras for
--- evaluation.
+data Sym
+  = SymN { _s :: String }
+  | SymT { _s :: String }
+  deriving (Eq,Ord,Show)
+
+symN1 x = [SymN x]
+symT1 x = [SymT x]
+
+makeLenses ''Sym
+
+-- | Define a product to be of vectorial non-terminal to a set of right-hand
+-- sides. Each side is a list of terminals and non-terminals. They have the
+-- same dimensionality as the left-hand side. In each list "column" can be
+-- terminals and non-terminals.
 --
--- TODO we want to separate N/T in the long run ...
+-- NOTE We currently do not enforce same dimensionality. Would be nice but
+-- TypeLits are not yet ready ...
+
+data Pro = Pro { _lh :: [Sym], _rhs :: (Set [[Sym]]) }
+  deriving (Eq,Ord,Show)
 
 data Grammar = Grammar
-  { nonterms    :: [NT]
-  , terminals   :: [NT]
-  , productions :: [Production]
-  , startSym    :: NT
+  { _n :: Set [Sym]
+  , _t :: Set [Sym]
+  , _p :: Set Pro
   }
+  deriving (Eq,Ord,Show)
 
--- | Terminals and non-terminals are the same species.
+makeLenses ''Grammar
 
-data NT where
-  Terminal :: String -> NT
-  Nonterm  :: String -> NT
-  deriving (Show,Eq)
+-- | Direct product of two grammars.
 
-data Production where
-  Production :: NT -> [[NT]] -> Production
-  deriving (Show)
+productG :: Grammar -> Grammar -> Grammar
+productG (Grammar ns1 ts1 ps1) (Grammar ns2 ts2 ps2) = Grammar (productNT ns1 ns2) (productNT ts1 ts2) (productP ps1 ps2)
 
--- | productions should form a semigroup given equal NT identifier.
--- Unfortunately, we are not dependently-typed on nt ...
+-- | Direct product of two terminal sets.
 
-{-
-instance Semigroup Production where
-  (Production a xs) <> (Production b ys)
-    | a==b = Production a (xs ++ ys)
-    | otherwise = error ""
--}
+productNT :: Set [Sym] -> Set [Sym] -> Set [Sym]
+productNT xs ys = S.fromList [ x++y | x <- S.toList xs, y <- S.toList ys ]
 
-grammar :: QuasiQuoter
-grammar = QuasiQuoter
-  { quoteExp = grammarExp
-  }
+productP :: Set Pro -> Set Pro -> Set Pro
+productP xs ys = S.fromList [ combine x y | x <- S.toList xs, y <- S.toList ys ] where
+  combine (Pro x xs) (Pro y ys) = Pro (x++y) (S.fromList [ cmb a b | a<- S.toList xs, b <- S.toList ys ])
+  cmb = undefined
 
-grammarExp :: String -> TH.ExpQ
-grammarExp = fail
 
-data CP where
-  CP :: [NT] -> [[NT]] -> CP
-  deriving (Show)
 
-{-
-p2cp :: Production -> CP
-p2cp (Production x ys) = CP [x] [ys]
+-- * trifecta parser for grammars
 
-cp :: CP -> CP -> CP
-cp (CP a xs) (CP b ys) = CP (a++b) [ x++y | x<-xs, y<- ys ]
+test = case parseString pGrammar mempty "N: X Y\nT: m d\nX -> X m | Y m\nY -> X d | Y d" of
+         Success s -> s
+         Failure f -> error $ show $ unsafePerformIO $ displayIO stdout $ renderPretty 0.8 80 $ f <> linebreak
 
-t = p2cp $ Production (Nonterm "X") [Nonterm "X", Terminal "u"]
--}
+pGrammar = build <$> pHeader <* newline <*> sepBy1 pP newline <* eof where
+  build (ns,ts) rs = Grammar (S.fromList ns) (S.fromList ts) (S.fromList rs) -- rs needs to (++) combine productions
 
-pN = Nonterm <$> some upper
-pT = Terminal <$> some lower
---pP = Production <$> pN <* string " -> " <*> sepBy1 (pN <|> pT) ws
---pPs = foldl (flip (:)) [] <$> sepBy1 pP newline
+-- | Each grammar declares both non-terminals and terminals first
+
+pHeader = (,) <$> pn <* newline <*> pt where
+  pn = string "N:" *> ws *> (sepBy1 pN ws)
+  pt = string "T:" *> ws *> (sepBy1 pT ws)
+
+pP = f <$> pN <* string " -> " <*> sepBy1 rhs (char '|' <* ws) where
+  f n rs = Pro n (S.fromList rs)
+  rhs = sepEndBy1 (pN <|> pT) ws
+
+pN = symN1 <$> some upper
+pT = symT1 <$> some lower
 
 ws = some $ char ' '
+
