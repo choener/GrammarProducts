@@ -12,6 +12,22 @@
 {-# LANGUAGE NoMonomorphismRestriction #-}
 {-# LANGUAGE GADTs #-}
 
+-- |
+--
+-- TODO add a bunch of newtypes to hide implementation details
+--
+-- TODO replace Set Pro with Map N -> [NT]
+--
+-- TODO any way to re-introduce statically determined dimensionality? There
+-- might be a problem there, say aligning [Xa][Y], but then we want to figure
+-- this out before creating the production rule.
+--
+-- TODO "Grammar -> ADPfusion grammar" with prettyprinting please!
+--
+-- TODO inlinePrint to print ADPfusion grammar during compilation
+--
+-- TODO function that produces specialized algebras for the grammar
+
 module BioInf.GrammarProducts where
 
 import Language.Haskell.TH.Quote
@@ -82,11 +98,19 @@ productP xs ys = S.fromList [ combine x y | x <- S.toList xs, y <- S.toList ys ]
 
 -- * trifecta parser for grammars
 
-test = case parseString pGrammar mempty "N: X Y\nT: m d\nX -> X m | Y m\nY -> X d | Y d" of
+-- | Simple test case.
+--
+-- N: X Y
+-- T: m d
+--
+-- X -> X m | Y m
+-- Y -> X d | Y d
+
+test = case parseString pGrammar mempty "N: X Y\nT: m d\n\nX -> X m | Y m\nY -> X d | Y d" of
          Success s -> s
          Failure f -> error $ show $ unsafePerformIO $ displayIO stdout $ renderPretty 0.8 80 $ f <> linebreak
 
-pGrammar = build <$> pHeader <* newline <*> sepBy1 pP newline <* eof where
+pGrammar = build <$> pHeader <* some newline <*> sepBy1 pP newline <* eof where
   build (ns,ts) rs = Grammar (S.fromList ns) (S.fromList ts) (S.fromList rs) -- rs needs to (++) combine productions
 
 -- | Each grammar declares both non-terminals and terminals first
