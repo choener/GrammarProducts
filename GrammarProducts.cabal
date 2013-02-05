@@ -1,7 +1,7 @@
 name:           GrammarProducts
 version:        0.0.0.1
-author:         Christian Hoener zu Siederdissen, Peter F. Stadler, 2013
-copyright:      Christian Hoener zu Siederdissen, Peter F. Stadler, 2013
+author:         Christian Hoener zu Siederdissen, 2013
+copyright:      Christian Hoener zu Siederdissen, Ivo L. Hofacker, Peter F. Stadler, 2013
 homepage:       http://www.tbi.univie.ac.at/~choener/
 maintainer:     choener@tbi.univie.ac.at
 category:       Bioinformatics
@@ -17,6 +17,25 @@ description:
                 generation of complex grammars from more simple building
                 blocks. Internally, grammars are written using ADPfusion
                 operations and yield efficient code.
+                .
+                We provide a library with a parser for grammatical constructs.
+                Parsed grammars can be combined in several ways and transformed
+                into ADPfusion constructs which yield efficient implementations
+                of the combined grammars. Alternatively, such combined grammars
+                may be pretty-printed using the "GrammarProducts" executable.
+                .
+                Grammar attributes, or algebras, are /not/ handled. They 
+                .
+                .
+                .
+                Formal background can be found in:
+                .
+                .
+                Hoener zu Siederdissen, Hofacker, Stadler,
+                .
+                NO TITLE YET,
+                .
+                in preparation, 2013
 
 
 
@@ -72,6 +91,10 @@ executable MultiAlign
 --    -fllvm
 --    -optlo-O3
 --    -optlo-std-compile-opts
+
+
+
+-- executable GrammarProduct
 
 
 
