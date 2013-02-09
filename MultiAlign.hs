@@ -11,6 +11,19 @@ import BioInf.GrammarProducts
 main :: IO ()
 main = return ()
 
+{-
+
+-- We want and need attributes (f,g here) to be able to identify algebra
+-- functions we need to create. Maybe we can do it without explicit naming?
+-- More of a U/I questions.
+Grammar: Test_1
+N: X
+T: a
+F: _f _g
+
+X -> _f < a X a | _g < X a
+
+-}
 
 {-
 test = [grammar|
@@ -20,6 +33,7 @@ test = [grammar|
 -- data VC <ynm> <xs>, where ynm = Yes|No|Maybe. Yes advances, No doesn't
 -- advance, maybe produces two cases, one advancing, one not. And since these
 -- are empty data decls, they are optimized away during compilation.
+Grammar: AlignAffine
 
 N: X Y
 T: u -
