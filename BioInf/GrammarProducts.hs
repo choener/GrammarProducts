@@ -24,9 +24,14 @@
 --
 -- TODO "Grammar -> ADPfusion grammar" with prettyprinting please!
 --
--- TODO inlinePrint to print ADPfusion grammar during compilation
+-- TODO inlinePrint to print ADPfusion grammar during compilation (just unsafePerformIO that thing?!)
 --
 -- TODO function that produces specialized algebras for the grammar
+--
+-- TODO prettyprinting production rules:
+-- http://hackage.haskell.org/package/ipprint-0.5
+--
+-- TODO QQ needs to inline stuff
 
 module BioInf.GrammarProducts where
 
@@ -46,18 +51,101 @@ import Text.Trifecta.Result
 import Text.PrettyPrint.ANSI.Leijen as Pretty hiding (line, (<>), (<$>), empty, string, char)
 import System.IO (stdout)
 import System.IO.Unsafe (unsafePerformIO)
+import Control.Monad (liftM)
+import qualified Data.Vector as V
+import Data.Vector (Vector (..))
 
 
+
+-- * once more, with feeling
+
+-- ** grammar data types
+
+-- | A symbol is a single terminal or non-terminal on either
+-- left-hand or right-hand side. This is, on the level of
+-- symbol we do not distinguish between LHS and RHS (or
+-- equivalently the type of grammar we are looking at).
 
 data Sym
   = SymN { _s :: String }
   | SymT { _s :: String }
   deriving (Eq,Ord,Show)
 
+makeLenses ''Sym
+
+-- | A left-hand side in a grammar
+
+newtype Lhs = Lhs [Sym] -- cfg's and simpler have [SymN] here!
+
+-- | higher-dimensional lhs
+
+newtype LhsD = LhsD (Vector Lhs)
+
+-- | RHS
+
+newtype Rhs = Rhs [Sym]
+
+newtype RhsD = RhsD (Vector Rhs)
+
+-- | full production rule: one or more right-hand sides
+
+data PR = PR LhsD [RhsD]
+
+-- | full grammar
+
+data Grammar = Grammar
+  {
+  }
+
+-- ** QuasiQuoters
+
+-- *** grammar-structure prettyprinter QQ
+
+-- | QuasiQuoter parsing the input, producing the 'Grammar' ctor, but otherwise
+-- generating a string for pretty-printing.
+
+qqGV :: QuasiQuoter
+qqGV = QuasiQuoter
+  { quoteExp = qqParseExpGV
+  , quotePat = error "patterns not useful for grammar QQs"
+  , quoteType = error "types not useful for grammar QQs"
+  , quoteDec = error "declarations not useful for grammar QQs"
+  }
+
+qqParseExpGV :: String -> TH.ExpQ
+qqParseExpGV s = do
+  -- baustelle
+  return $ TH.LitE $ TH.StringL s
+
+-- *** verbatim QQ
+
+-- | QuasiQuoter producing the input verbatim as a string for prettyprinting.
+
+qqV :: QuasiQuoter
+qqV = QuasiQuoter
+  { quoteExp = qqParseExpV
+  , quotePat = error "patterns not useful for grammar QQs"
+  , quoteType = error "types not useful for grammar QQs"
+  , quoteDec = error "declarations not useful for grammar QQs"
+  }
+
+-- | Returns the input verbatim
+
+qqParseExpV :: String -> TH.ExpQ
+qqParseExpV s = do
+  loc <- TH.location
+  let fname = TH.loc_filename loc
+  let lpos  = TH.loc_start    loc
+  return $ TH.LitE $ TH.StringL s
+
+-- ** old
+
+{-
+
 symN1 x = [SymN x]
 symT1 x = [SymT x]
 
-makeLenses ''Sym
+-- data ProRHS = ProRHS { _fun :: [Fun], _terms :: [[Sym]] }
 
 -- | Define a product to be of vectorial non-terminal to a set of right-hand
 -- sides. Each side is a list of terminals and non-terminals. They have the
@@ -66,6 +154,8 @@ makeLenses ''Sym
 --
 -- NOTE We currently do not enforce same dimensionality. Would be nice but
 -- TypeLits are not yet ready ...
+--
+-- TODO add attribute function (that is required to evaluate the RHS
 
 data Pro = Pro { _lh :: [Sym], _rhs :: (Set [[Sym]]) }
   deriving (Eq,Ord,Show)
@@ -127,4 +217,5 @@ pN = symN1 <$> some upper
 pT = symT1 <$> some lower
 
 ws = some $ char ' '
+-}
 

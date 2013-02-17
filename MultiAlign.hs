@@ -11,6 +11,11 @@ import BioInf.GrammarProducts
 main :: IO ()
 main = return ()
 
+hmm :: String
+hmm = [qqV|
+X -> _f < a X a | _g < X a
+|]
+
 {-
 
 -- We want and need attributes (f,g here) to be able to identify algebra

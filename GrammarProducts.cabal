@@ -57,7 +57,8 @@ library
     containers ,
     lens ,
     ansi-wl-pprint ,
-    ghc-prim
+    ghc-prim ,
+    repa
   exposed-modules:
     BioInf.GrammarProducts
   ghc-options:
