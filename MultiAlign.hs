@@ -8,16 +8,24 @@
 module Main where
 
 import qualified Language.Haskell.TH as TH
+import TupleTH
 
 import BioInf.GrammarProducts
 
 main :: IO ()
 main = return ()
 
-x = $(pr "x")
+--x = $(pr "x")
 
 --hmm :: String
 -- hmm = [qqGV|
+
+-- Define the grammar "Test1" with one non-terminal X and two terminals "a" and
+-- "-". The Product will be named "Prod" (and the emitted symbol will be
+-- "gProd". We remove one symbol from the final grammar, namely the terminal
+-- made up of only deletions. All production rules with just that symbol will
+-- be deleted as well.
+
 [qqGD|
 Grammar: Test1
 N: X
@@ -25,10 +33,12 @@ T: a -
 X -> X a
 X -> X -
 //
+Product: Prod
+Prod: Test1 * Test1 * Test1 * Test1
+remove: -,-,-,-
+//
 |]
 {-
-Product: Test2
-Prod: Test1 ^ 4
 -}
 
 {-

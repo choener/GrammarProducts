@@ -114,7 +114,7 @@ qqTesting s = do
   let fname = TH.loc_filename loc
   let (lpos,cpos) = TH.loc_start loc
   case parseString
-        pGrammar
+        pFullDesc -- pProduct --pGrammar
         (Directed (pack fname) (fromIntegral lpos) 0 0 0)
         (trim s)
     of Failure f -> do
@@ -122,11 +122,12 @@ qqTesting s = do
         fail ""
        Success s -> do
         TH.reportWarning $ unlines ["","have successfully parsed grammar object ...", show s]
+        -- at this point we have at least one grammar and exactly one product description
         -- TODO Baustelle:
         -- hier muesste man jetzt die Grammatiken multiplizieren nach Regel,
         -- bis man schlussendlich eine durchmultiplizierte Grammatik erhaelt.
-        bla <- TH.runQ [d| g a b c = (a,b,c) |]
-        let gname = TH.mkName $ "g" ++ name s
+        bla <- TH.runQ [d| ggggg a b c = (a,b,c) |]
+        let gname = TH.mkName $ "g" -- ++ name s
         -- TODO Baustelle:
         -- momentan erzeuge ich ein Objekt "gTest1 :: ()"
         let g = TH.ValD (TH.VarP gname)
@@ -216,10 +217,14 @@ pNdefn = string "N:" *> ws *> sepBy1 pN ws
 pTdefn :: CharParsing f => f [Sym]
 pTdefn = string "T:" *> ws *> sepBy1 pT ws
 
+-- | Grammar name
+
+pGrammarName = (:) <$> upper <*> some alphaNum
+
 -- | Parse the first line of the grammar description
 
 pHeader :: CharParsing f => f String
-pHeader = oneOf "Gg" *> string "rammar:" *> ws *> some alphaNum
+pHeader = oneOf "Gg" *> string "rammar:" *> ws *> pGrammarName
 
 -- | Parse the last line of the grammar description
 
@@ -248,6 +253,38 @@ pGrammar = do
             }
   return g
 
+-- | Parse product operations
+
+data ProdOps
+  = ProdGr String
+  | ProdOp String
+  deriving (Eq,Ord,Show)
+
+pProductOps = sepEndBy (pGr <|> pOp) ws where -- (:) <$> pGr <*> many (pOp <*> pGr) where
+  pGr = ProdGr <$> pGrammarName
+  pOp = ProdOp <$> string "*"
+
+-- | parse what we maybe want to delete
+
+pDelete = string "remove:" *> ws *> some pR where
+  pR = sepBy1 pT (char ',')
+
+-- | Parse a product description
+
+pProduct = do
+  n <- (:) <$ string "Product:" <* ws <*> letter <*> some alphaNum <* newline
+  p <- string "Prod:" *> ws *> pProductOps <* newline
+  rs <- sepEndBy1 pDelete newline
+  pLast
+  return (n,p,rs)
+
+pFullDesc = do
+  gs <- sepEndBy1 pGrammar newline <?> "need to define at least one grammar!"
+  p  <- pProduct <?> "need to define exactly one product description"
+  spaces
+  eof
+  return (gs,p)
+
 -- | helper function with 1 .. space characters
 
 ws = some $ char ' '
@@ -256,7 +293,7 @@ wx = many $ char ' '
 -- ** old
 
 
-
+{-
 -- Describe a format string
 data Format = D | S | L String
 
@@ -279,3 +316,4 @@ gen [L s] = TH.stringE s
 -- from an input format string.
 pr :: String -> TH.Q TH.Exp
 pr s = gen (parse s)
+-}
