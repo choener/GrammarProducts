@@ -1,16 +1,19 @@
-{-# LANGUAGE TemplateHaskell #-}
-{-# LANGUAGE UndecidableInstances #-}
+{-# LANGUAGE ViewPatterns #-}
+{-# LANGUAGE DataKinds #-}
+{-# LANGUAGE DeriveFoldable #-}
+{-# LANGUAGE EmptyDataDecls #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE MultiParamTypeClasses #-}
-{-# LANGUAGE DeriveFoldable #-}
-{-# LANGUAGE StandaloneDeriving #-}
-{-# LANGUAGE TypeOperators #-}
-{-# LANGUAGE EmptyDataDecls #-}
-{-# LANGUAGE KindSignatures #-}
-{-# LANGUAGE DataKinds #-}
-{-# LANGUAGE NoMonomorphismRestriction #-}
 {-# LANGUAGE GADTs #-}
+{-# LANGUAGE KindSignatures #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE NoMonomorphismRestriction #-}
+{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE StandaloneDeriving #-}
+{-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE TypeOperators #-}
+{-# LANGUAGE UndecidableInstances #-}
 
 -- |
 --
@@ -35,25 +38,27 @@
 
 module BioInf.GrammarProducts where
 
-import Language.Haskell.TH.Quote
-import qualified Language.Haskell.TH as TH
-import Text.Trifecta
-import Control.Applicative
-import Data.Semigroup
-import qualified Data.Set as S
-import Data.Set (Set(..))
-import GHC.TypeLits
-import Text.Printf
-import Data.Foldable as F
 import Control.Applicative
 import Control.Lens
-import Text.Trifecta.Result
-import Text.PrettyPrint.ANSI.Leijen as Pretty hiding (line, (<>), (<$>), empty, string, char)
+import Control.Monad (liftM)
+import qualified Data.Foldable as F
+import Data.Semigroup
+import Data.Set (Set(..))
+import Data.Vector (Vector (..))
+import GHC.TypeLits
+import Language.Haskell.TH.Quote
+import qualified Data.Set as S
+import qualified Data.Vector as V
+import qualified Language.Haskell.TH as TH
 import System.IO (stdout)
 import System.IO.Unsafe (unsafePerformIO)
-import Control.Monad (liftM)
-import qualified Data.Vector as V
-import Data.Vector (Vector (..))
+import Text.PrettyPrint.ANSI.Leijen as Pretty hiding (line, (<>), (<$>), empty, string, char)
+import Text.Printf
+import Text.Trifecta
+import Text.Trifecta.Delta
+import Text.Trifecta.Result
+import Data.ByteString.Char8 (pack)
+import Data.Either
 
 
 
@@ -73,32 +78,68 @@ data Sym
 
 makeLenses ''Sym
 
--- | A left-hand side in a grammar
+newtype VSym = VSym [Sym]
+  deriving (Eq,Ord,Show)
 
-newtype Lhs = Lhs [Sym] -- cfg's and simpler have [SymN] here!
+-- | full production rule
 
--- | higher-dimensional lhs
-
-newtype LhsD = LhsD (Vector Lhs)
-
--- | RHS
-
-newtype Rhs = Rhs [Sym]
-
-newtype RhsD = RhsD (Vector Rhs)
-
--- | full production rule: one or more right-hand sides
-
-data PR = PR LhsD [RhsD]
+data Rule = Rule VSym [VSym]
+  deriving (Eq,Ord,Show)
 
 -- | full grammar
 
 data Grammar = Grammar
-  {
+  { name      :: String
+  , terminals :: [VSym]
+  , nonterms  :: [VSym]
+  , rules     :: [Rule]
   }
+  deriving (Eq,Ord,Show)
 
 -- ** QuasiQuoters
 
+qqGD :: QuasiQuoter
+qqGD = QuasiQuoter
+  { quoteExp = error "" -- qqTesting
+  , quotePat = error "patterns not useful for grammar QQs"
+  , quoteType = error "types not useful for grammar QQs"
+  , quoteDec = qqTesting
+  }
+
+--qqParseExpGV :: String -> TH.ExpQ
+qqTesting s = do
+  loc <- TH.location
+  let trim ('\n':xs) = xs
+      trim xs        = xs
+  let fname = TH.loc_filename loc
+  let (lpos,cpos) = TH.loc_start loc
+  case parseString
+        pGrammar
+        (Directed (pack fname) (fromIntegral lpos) 0 0 0)
+        (trim s)
+    of Failure f -> do
+        TH.runIO $ displayIO stdout $ renderPretty 0.8 80 $ f <> linebreak
+        fail ""
+       Success s -> do
+        TH.reportWarning $ unlines ["","have successfully parsed grammar object ...", show s]
+        -- TODO Baustelle:
+        -- hier muesste man jetzt die Grammatiken multiplizieren nach Regel,
+        -- bis man schlussendlich eine durchmultiplizierte Grammatik erhaelt.
+        bla <- TH.runQ [d| g a b c = (a,b,c) |]
+        let gname = TH.mkName $ "g" ++ name s
+        -- TODO Baustelle:
+        -- momentan erzeuge ich ein Objekt "gTest1 :: ()"
+        let g = TH.ValD (TH.VarP gname)
+                  (TH.NormalB
+                    (TH.TupE []
+                    )
+                  ) []
+        -- make me inlineable
+        let inl = TH.PragmaD $ TH.InlineP gname TH.Inline TH.FunLike TH.AllPhases
+        return $
+          [ g   -- write the grammar itself
+          , inl -- inline the grammar
+          ] ++ bla
 -- *** grammar-structure prettyprinter QQ
 
 -- | QuasiQuoter parsing the input, producing the 'Grammar' ctor, but otherwise
@@ -114,8 +155,20 @@ qqGV = QuasiQuoter
 
 qqParseExpGV :: String -> TH.ExpQ
 qqParseExpGV s = do
-  -- baustelle
-  return $ TH.LitE $ TH.StringL s
+  loc <- TH.location
+  let trim ('\n':xs) = xs
+      trim xs        = xs
+  let fname = TH.loc_filename loc
+  let (lpos,cpos) = TH.loc_start loc
+  let fs = case parseString
+                  pGrammar
+                  (Directed (pack fname) (fromIntegral lpos) 0 0 0)
+                  (trim s)
+            of Success s -> s
+               Failure f -> error $ show f
+               --error $ show $ unsafePerformIO $ displayIO stdout $ renderPretty 0.8 80 $ f <> linebreak
+
+  return $ TH.LitE $ TH.StringL $ show $ fs
 
 -- *** verbatim QQ
 
@@ -138,84 +191,91 @@ qqParseExpV s = do
   let lpos  = TH.loc_start    loc
   return $ TH.LitE $ TH.StringL s
 
--- ** old
+-- * parsers
 
-{-
+-- | parse a single non-terminal
 
-symN1 x = [SymN x]
-symT1 x = [SymT x]
+pN :: CharParsing f => f Sym
+pN = (SymN .) . (:) <$> upper <*> many alphaNum
 
--- data ProRHS = ProRHS { _fun :: [Fun], _terms :: [[Sym]] }
+-- | parse a single terminal. There is a special case of one or more '-' which
+-- we may use too. Theses will probably be bound to a parser that doesn't
+-- advance.
 
--- | Define a product to be of vectorial non-terminal to a set of right-hand
--- sides. Each side is a list of terminals and non-terminals. They have the
--- same dimensionality as the left-hand side. In each list "column" can be
--- terminals and non-terminals.
---
--- NOTE We currently do not enforce same dimensionality. Would be nice but
--- TypeLits are not yet ready ...
---
--- TODO add attribute function (that is required to evaluate the RHS
+pT :: CharParsing f => f Sym
+pT =   (SymT .) . (:) <$> lower <*> many alphaNum
+   <|> SymT           <$> some (char '-')
 
-data Pro = Pro { _lh :: [Sym], _rhs :: (Set [[Sym]]) }
-  deriving (Eq,Ord,Show)
+-- | parse the list of non-terminal symbols
 
-data Grammar = Grammar
-  { _n :: Set [Sym]
-  , _t :: Set [Sym]
-  , _p :: Set Pro
-  }
-  deriving (Eq,Ord,Show)
+pNdefn :: CharParsing f => f [Sym]
+pNdefn = string "N:" *> ws *> sepBy1 pN ws
 
-makeLenses ''Grammar
+-- | parse the list of terminal symbols
 
--- | Direct product of two grammars.
+pTdefn :: CharParsing f => f [Sym]
+pTdefn = string "T:" *> ws *> sepBy1 pT ws
 
-productG :: Grammar -> Grammar -> Grammar
-productG (Grammar ns1 ts1 ps1) (Grammar ns2 ts2 ps2) = Grammar (productNT ns1 ns2) (productNT ts1 ts2) (productP ps1 ps2)
+-- | Parse the first line of the grammar description
 
--- | Direct product of two terminal sets.
+pHeader :: CharParsing f => f String
+pHeader = oneOf "Gg" *> string "rammar:" *> ws *> some alphaNum
 
-productNT :: Set [Sym] -> Set [Sym] -> Set [Sym]
-productNT xs ys = S.fromList [ x++y | x <- S.toList xs, y <- S.toList ys ]
+-- | Parse the last line of the grammar description
 
-productP :: Set Pro -> Set Pro -> Set Pro
-productP xs ys = S.fromList [ combine x y | x <- S.toList xs, y <- S.toList ys ] where
-  combine (Pro x xs) (Pro y ys) = Pro (x++y) (S.fromList [ cmb a b | a<- S.toList xs, b <- S.toList ys ])
-  cmb = undefined
+pLast = string "//"
+
+pRules :: CharParsing f => f Rule
+pRules = f <$> pN <* ws <* string "->" <* ws <*> (sepEndBy1 (pN <|> pT) wx) where
+  f l rs = Rule (VSym $ [l]) [ VSym [r] | r <- rs ]
 
 
 
--- * trifecta parser for grammars
+-- | Parse a full grammar description
 
--- | Simple test case.
---
--- N: X Y
--- T: m d
---
--- X -> X m | Y m
--- Y -> X d | Y d
+pGrammar = do
+  h <- pHeader <* newline
+  nts <- sepEndBy1 (Left <$> pNdefn <|> Right <$> pTdefn) newline
+  rs <- sepEndBy1 pRules newline
+  pLast
+  let ns :: [VSym] = map (VSym . (:[])) $ concat $ lefts  nts
+  let ts :: [VSym] = map (VSym . (:[])) $ concat $ rights nts
+  let g = Grammar
+            { name      = h
+            , terminals = ts
+            , nonterms  = ns
+            , rules     = rs
+            }
+  return g
 
-test = case parseString pGrammar mempty "N: X Y\nT: m d\n\nX -> X m | Y m\nY -> X d | Y d" of
-         Success s -> s
-         Failure f -> error $ show $ unsafePerformIO $ displayIO stdout $ renderPretty 0.8 80 $ f <> linebreak
-
-pGrammar = build <$> pHeader <* some newline <*> sepBy1 pP newline <* eof where
-  build (ns,ts) rs = Grammar (S.fromList ns) (S.fromList ts) (S.fromList rs) -- rs needs to (++) combine productions
-
--- | Each grammar declares both non-terminals and terminals first
-
-pHeader = (,) <$> pn <* newline <*> pt where
-  pn = string "N:" *> ws *> (sepBy1 pN ws)
-  pt = string "T:" *> ws *> (sepBy1 pT ws)
-
-pP = f <$> pN <* string " -> " <*> sepBy1 rhs (char '|' <* ws) where
-  f n rs = Pro n (S.fromList rs)
-  rhs = sepEndBy1 (pN <|> pT) ws
-
-pN = symN1 <$> some upper
-pT = symT1 <$> some lower
+-- | helper function with 1 .. space characters
 
 ws = some $ char ' '
--}
+wx = many $ char ' '
 
+-- ** old
+
+
+
+-- Describe a format string
+data Format = D | S | L String
+
+-- Parse a format string.  This is left largely to you
+-- as we are here interested in building our first ever
+-- Template Haskell program and not in building printf.
+parse :: String -> [Format]
+parse "x" = [D]
+parse s   = [ L s ]
+
+-- Generate Haskell source code from a parsed representation
+-- of the format string.  This code will be spliced into
+-- the module which calls "pr", at compile time.
+gen :: [Format] -> TH.Q TH.Exp
+gen [D]   = [| \n -> show n |]
+gen [S]   = [| \s -> s |]
+gen [L s] = TH.stringE s
+
+-- Here we generate the Haskell code for the splice
+-- from an input format string.
+pr :: String -> TH.Q TH.Exp
+pr s = gen (parse s)

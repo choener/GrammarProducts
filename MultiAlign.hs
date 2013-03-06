@@ -1,3 +1,4 @@
+{-# LANGUAGE NoMonomorphismRestriction #-}
 {-# LANGUAGE QuasiQuotes #-}
 
 -- | TODO we need to fix the start symbol (not that important, from whatever
@@ -6,15 +7,29 @@
 
 module Main where
 
+import qualified Language.Haskell.TH as TH
+
 import BioInf.GrammarProducts
 
 main :: IO ()
 main = return ()
 
-hmm :: String
-hmm = [qqV|
-X -> _f < a X a | _g < X a
+x = $(pr "x")
+
+--hmm :: String
+-- hmm = [qqGV|
+[qqGD|
+Grammar: Test1
+N: X
+T: a -
+X -> X a
+X -> X -
+//
 |]
+{-
+Product: Test2
+Prod: Test1 ^ 4
+-}
 
 {-
 
