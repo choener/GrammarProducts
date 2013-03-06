@@ -96,6 +96,30 @@ data Grammar = Grammar
   }
   deriving (Eq,Ord,Show)
 
+-- | The "normal" product operation
+--
+-- TODO need better "comb" operation:
+-- - we want to "group" on terminal / non-terminal
+-- - introduce "-" terminals where required in the terminal groups
+-- - produce an error if non-terminal groups are of uneven size ?!
+
+grammarProduct :: Grammar -> Grammar -> Grammar
+grammarProduct x y = Grammar
+  { name = name x ++ "-" ++ name y
+  , terminals = [ VSym $ a++b | VSym a <- terminals x, VSym b <- terminals y ]
+  , nonterms  = [ VSym $ a++b | VSym a <- terminals x, VSym b <- terminals y ]
+  , rules     = [ Rule (VSym $ a++b) (comb as bs) | Rule (VSym a) as <- rules x
+                                                  , Rule (VSym b) bs <- rules y ]
+  } where
+      comb []          []          = []
+      comb (VSym a:as) []          = VSym (a ++ [SymT "-"]) : comb as []
+      comb []          (VSym b:bs) = VSym ([SymT "-"] ++ b) : comb [] bs
+      comb (VSym a:as) (VSym b:bs) = VSym (a     ++      b) : comb as bs
+
+-- | Removal of a symbol and cleanup of rules
+
+-- | consistency check
+
 -- ** QuasiQuoters
 
 qqGD :: QuasiQuoter

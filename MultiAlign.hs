@@ -1,3 +1,5 @@
+{-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE NoMonomorphismRestriction #-}
 {-# LANGUAGE QuasiQuotes #-}
 
@@ -38,8 +40,47 @@ Prod: Test1 * Test1 * Test1 * Test1
 remove: -,-,-,-
 //
 |]
+
+
+allTuples = $(subtuples 4 2)
 {-
+foldTuples = $(foldlTuple 6)
+sumOfPairs f x = foldTuples f x . allTuples
 -}
+
+type LookupTable = () -- how to look up?
+
+class PairEval a b where
+  pairEval :: LookupTable -> Int -> (a,b) -> Int
+
+instance PairEval Int Int where
+  pairEval lkup x (a,b) = x + (a+b) -- replace (a+b) with "lkup a b"
+
+instance PairEval Int () where
+  pairEval lkup x (a,()) = x + (a)
+
+allPE lkup x t = pe $ allTuples t where
+  pe (a,b,c,d,e,f) =
+    ( pairEval lkup x a
+    , pairEval lkup x b
+    , pairEval lkup x c
+    , pairEval lkup x d
+    , pairEval lkup x e
+    , pairEval lkup x f
+    )
+
+--finalSOP = sumOfPairs (pairEval (undefined :: LookupTable))
+
+i :: Int
+i = 1
+
+
+
+
+
+
+
+
 
 {-
 
