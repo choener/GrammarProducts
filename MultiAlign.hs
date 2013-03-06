@@ -27,6 +27,10 @@ main = return ()
 -- "gProd". We remove one symbol from the final grammar, namely the terminal
 -- made up of only deletions. All production rules with just that symbol will
 -- be deleted as well.
+--
+-- TODO add algebra functions "X -> .f X a" .. if we use only one function ".f"
+-- and keep that one polymorphic, as down below, we should be happy enough as
+-- the product op should generate only one function ".ffff" for us.
 
 [qqGD|
 Grammar: Test1
@@ -50,6 +54,10 @@ sumOfPairs f x = foldTuples f x . allTuples
 
 type LookupTable = () -- how to look up?
 
+-- | we probably want to add "x" later, not in each pairEval function ?!  On
+-- the other hand, this is more like the usual algebra stuff, especially with
+-- regards to backtracking ...
+
 class PairEval a b where
   pairEval :: LookupTable -> Int -> (a,b) -> Int
 
@@ -59,7 +67,13 @@ instance PairEval Int Int where
 instance PairEval Int () where
   pairEval lkup x (a,()) = x + (a)
 
-allPE lkup x t = pe $ allTuples t where
+instance PairEval () Int where
+  pairEval lkup x ((),a) = x + (a)
+
+instance PairEval () () where
+  pairEval lkup x ((),()) = x + 0
+
+allPE lkup x t = $(sumTuple 6) $ pe $ allTuples t where
   pe (a,b,c,d,e,f) =
     ( pairEval lkup x a
     , pairEval lkup x b
