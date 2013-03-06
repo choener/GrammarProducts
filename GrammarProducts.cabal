@@ -59,7 +59,8 @@ library
     ansi-wl-pprint ,
     ghc-prim ,
     bytestring ,
-    repa
+    repa,
+    tuple-th
   exposed-modules:
     BioInf.GrammarProducts
   ghc-options:
