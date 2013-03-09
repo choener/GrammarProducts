@@ -83,13 +83,6 @@ pGrammar = do
             }
   return g
 
--- | Parse product operations
-
-data ProdOps
-  = ProdGr String
-  | ProdOp String
-  deriving (Eq,Ord,Show)
-
 pProductOps = sepEndBy (pGr <|> pOp) ws where -- (:) <$> pGr <*> many (pOp <*> pGr) where
   pGr = ProdGr <$> pGrammarName
   pOp = ProdOp <$> string "*"
@@ -97,7 +90,7 @@ pProductOps = sepEndBy (pGr <|> pOp) ws where -- (:) <$> pGr <*> many (pOp <*> p
 -- | parse what we maybe want to delete
 
 pDelete = string "remove:" *> ws *> some pR where
-  pR = sepBy1 pT (char ',')
+  pR = VSym <$> sepBy1 pT (char ',')
 
 -- | Parse a product description
 
@@ -106,7 +99,12 @@ pProduct = do
   p <- string "Prod:" *> ws *> pProductOps <* newline
   rs <- sepEndBy1 pDelete newline
   pLast
-  return (n,p,rs)
+  return $ GProduct
+    { pname = n
+    , pprod = p
+    , pdels = concat $ rs
+    }
+--  return (n,p,rs)
 
 pFullDesc = do
   gs <- sepEndBy1 pGrammar newline <?> "need to define at least one grammar!"

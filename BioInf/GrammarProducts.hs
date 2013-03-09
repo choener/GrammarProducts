@@ -57,6 +57,11 @@ import BioInf.GrammarProducts.Grammar
 import BioInf.GrammarProducts.TH
 
 
+
+qqGDhere = qqGD $ GrammarOperations
+  { productOperations = [("*", grammarProduct)]
+  }
+
 -- * once more, with feeling
 
 -- | The "normal" product operation
@@ -71,17 +76,11 @@ grammarProduct x y = Grammar
   { name = name x ++ "-" ++ name y
   , terminals = [ VSym $ a++b | VSym a <- terminals x, VSym b <- terminals y ]
   , nonterms  = [ VSym $ a++b | VSym a <- terminals x, VSym b <- terminals y ]
-  , functions = error "function product missing"
-  , rules     = [ Rule (VSym $ a++b) (f++"_"++g) (comb as bs)
+  , functions = [ fx ++ fy | fx <- functions x, fy <- functions y ]
+  , rules     = [ Rule (VSym $ a++b) (f++"_"++g) (ruleProduct as bs)
                 | Rule (VSym a) f as <- rules x
                 , Rule (VSym b) g bs <- rules y ]
-  } where
-      comb []          []          = []
-      {-
-      comb (VSym a:as) []          = VSym (a ++ [Sym T "-"]) : comb as []
-      comb []          (VSym b:bs) = VSym ([Sym T "-"] ++ b) : comb [] bs
-      comb (VSym a:as) (VSym b:bs) = VSym (a     ++      b) : comb as bs
-      -}
+  }
 
 -- |
 

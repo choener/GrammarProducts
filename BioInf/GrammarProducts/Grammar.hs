@@ -38,7 +38,7 @@ newtype VSym = VSym [Sym]
 -- | full production rule
 
 data Rule = Rule VSym String [VSym]
-  deriving (Eq,Ord,Show)
+  deriving (Eq,Ord,Show,Data,Typeable)
 
 -- | full grammar
 
@@ -49,7 +49,23 @@ data Grammar = Grammar
   , functions :: [String]
   , rules     :: [Rule]
   }
-  deriving (Eq,Ord,Show)
+  deriving (Eq,Ord,Show,Data,Typeable)
+
+-- | A grammar product definition
+
+data GProduct = GProduct
+  { pname :: String
+  , pprod :: [ProdOps]
+  , pdels :: [VSym]
+  }
+  deriving (Eq,Ord,Show,Data,Typeable)
+
+-- | Parse product operations
+
+data ProdOps
+  = ProdGr String
+  | ProdOp String
+  deriving (Eq,Ord,Show,Data,Typeable)
 
 -- | No types, since we want this to work on multiple levels
 

@@ -13,6 +13,7 @@ import qualified Language.Haskell.TH as TH
 import TupleTH
 
 import BioInf.GrammarProducts
+import BioInf.GrammarProducts.TH
 
 main :: IO ()
 main = return ()
@@ -32,13 +33,14 @@ main = return ()
 -- and keep that one polymorphic, as down below, we should be happy enough as
 -- the product op should generate only one function ".ffff" for us.
 
-[qqGD|
+
+[qqGDhere|
 Grammar: Test1
 N: X
-T: a -
+T: p a -
 F: f
-X -> f $ X a
-X -> g $ X -
+X -> f $ X p a
+X -> f $ X p -
 //
 Product: Prod
 Prod: Test1 * Test1 * Test1 * Test1
