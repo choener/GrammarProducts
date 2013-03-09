@@ -1,3 +1,5 @@
+{-# LANGUAGE PatternGuards #-}
+{-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE QuasiQuotes #-}
 {-# LANGUAGE TemplateHaskell #-}
@@ -16,7 +18,7 @@ module BioInf.GrammarProducts.TH where
 import Data.ByteString.Char8 (pack)
 import Data.Semigroup
 import Language.Haskell.TH.Quote
-import qualified Language.Haskell.TH as TH
+import Language.Haskell.TH as TH
 import System.IO (stdout)
 import System.IO.Unsafe (unsafePerformIO)
 import Text.PrettyPrint.ANSI.Leijen as Pretty hiding (line, (<>), (<$>), empty, string, char)
@@ -93,6 +95,27 @@ qqTesting gOps s = do
           , inl -- inline the grammar
           ] ++ bla
 
+-- | Create a grammar declaration from a 'Grammar' object
+
+grammarDecQ :: Grammar -> DecQ
+grammarDecQ Grammar{..} = do
+  let gname = mkName $ "g" ++ name
+  -- creating a lookup storage for 'Grammar' function names to TH 'new
+  fnames <- sequence [ newName f >>= \z -> return (f,z) | f <- functions ]
+  -- arguments to capture: (i) functions to apply, (ii) non-terminals (actually the memoization data structure), (iii) terminal data (NOT terminal symbol, those are created here)
+  --
+  -- (i)
+  let fs = tupP [] -- put all functions in here
+  let args = [fs]
+  let gbody = undefined
+  -- the expression (capture arguments and the resulting RHS)
+  let e = lamE args gbody
+  -- the outermost part in creating the grammar
+  -- valD (g::Pat) (b::Body) (ds::[Dec]) ==>
+  -- g = b where ds
+  g <- valD (varP gname) (normalB e) []
+  return undefined
+
 -- | Folds different grammars using the grammar product operation.
 --
 -- NOTE the @delete@ operation used here should be employed last as it works on
@@ -101,7 +124,8 @@ qqTesting gOps s = do
 -- your own version of 'foldGrammars' and give that to the TH system.
 
 foldGrammars :: GrammarOperations -> [Grammar] -> GProduct -> Grammar
-foldGrammars gOps gs p = delete $ initial $ pprod p where
+foldGrammars gOps gs p = rename $ delete $ initial $ pprod p where
+  rename g = g {name = pname p}
   delete g = g {rules = filter (\(Rule l f rs) -> null $ intersect (pdels p) rs) $ rules g}
   initial []  = error $ "specified empty product: " ++ show (pprod p)
   initial (ProdGr gn : ps)
