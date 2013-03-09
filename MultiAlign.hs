@@ -36,8 +36,9 @@ main = return ()
 Grammar: Test1
 N: X
 T: a -
-X -> X a
-X -> X -
+F: f
+X -> f $ X a
+X -> g $ X -
 //
 Product: Prod
 Prod: Test1 * Test1 * Test1 * Test1
