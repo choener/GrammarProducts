@@ -41,8 +41,9 @@ T: p
 T: a
 T: -
 F: f
+F: g
 X -> f $ X p a
-X -> f $ X p -
+X -> g $ X p -
 //
 Product: Prod
 Prod: Test1 * Test1 * Test1 * Test1
