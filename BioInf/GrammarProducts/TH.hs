@@ -153,8 +153,8 @@ mkRule :: Names -> Rule -> ExpQ
 mkRule Names{..} (Rule lhs f rhs) = do
   let stack = let go :: ExpQ -> ExpQ -> ExpQ
                   go g r = infixE (Just g) (conE $ mkName "%") (Just r)
-              in  foldl1' go $ map (vsymToExpQ M.!) rhs
-  infixE (Just $ vfunToExpQ M.! f) (conE $ mkName "<<<") (Just $ stack)
+              in  foldl1' go $ map (vsymToVarQ M.!) rhs
+  infixE (Just $ vfunToVarQ M.! f) (conE $ mkName "<<<") (Just $ stack)
 
 -- | Join different rules by using @(|||)@ and @(...)@ providing a complete
 -- right-part for a grammar non-terminal.
@@ -168,11 +168,45 @@ mkADPproductions Names{..} rules h = do
 -- the 'Name' associated with symbols and other things.
 
 mkNames :: Grammar -> Q Names
-mkNames = undefined
+mkNames g@Grammar{..} = do
+  let lhs = nub $ map _lhs $ rules
+  let fun = nub $ map _fun $ rules
+  let rhs = nub $ concat $ map _rhs $ rules
+  let sym = nub $ lhs ++ rhs
+  fsq <- sequence (map mkNameFromFun fun)
+  tsq <- mkScalarTermNames sym
+  return Names
+    { vfunToName = M.fromList $ zip fun fsq
+    , vfunToVarQ = M.fromList $ zip fun (map varE fsq)
+    }
+
+mkScalarTermNames :: [VSym] -> Q (M.Map Sym Name)
+mkScalarTermNames xs = do
+  let ts = filter ((==T) . symType) $ nub $ concat [ ys | VSym ys <- xs ]
+  tsq <- sequence [newName $ sanitize $ t | Sym _ t <- ts]
+  return $ M.fromList $ zip ts tsq
+
+mkNameFromFun :: VFun -> Q Name
+mkNameFromFun (VFun fs) = do
+  newName $ sanitize $ show fs
+
+mkVarQFromVSym :: M.Map Sym Name -> VSym -> ExpQ
+mkVarQFromVSym ss v
+  | symType v == N = do n <- newName $ sanitize $ show v
+                        varE n    -- created the "variable name" for non-term
+  | symType v == T = do let (VSym ts') = v
+                        let t = conE $ mkName "T"
+                        let ts = map varE $ [ss M.! t' | t' <- ts'] -- created the variable names for the Term elements
+                        let stack = let go :: ExpQ -> ExpQ -> ExpQ
+                                        go g r = infixE (Just g) (conE $ mkName ":.") (Just r)
+                                    in  foldl1' go ts
+                        appE (conE $ mkName "Term") stack
 
 data Names = Names
-  { vfunToExpQ :: M.Map VFun ExpQ
-  , vsymToExpQ :: M.Map VSym ExpQ
+  { vfunToName :: M.Map VFun Name
+  , vfunToVarQ :: M.Map VFun ExpQ
+  , vsymToName :: M.Map VSym Name
+  , vsymToVarQ :: M.Map VSym ExpQ
   }
 
 rulesToTupleQ :: Grammar -> [(VFun,Name)] -> [(VSym,Name)] -> [((String,Int),Name)] -> [ExpQ]
