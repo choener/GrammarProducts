@@ -91,19 +91,32 @@ pProductOps = sepEndBy (pGr <|> pOp) ws where -- (:) <$> pGr <*> many (pOp <*> p
 -- | parse what we maybe want to delete
 
 pDelete = string "remove:" *> ws *> some pR where
-  pR = VSym <$> sepBy1 pT (char ',')
+  pR = (Left . VSym) <$> sepBy1 pT (char ',')
+
+--pAddRule :: CharParsing f => f (Either a Rule)
+pAddRule = (\c -> [Right c]) <$ string "addrule:" <* ws <*> pVRule
+
+pVRule :: CharParsing f => f Rule
+pVRule = f <$> pVN <* ws <* string "->" <* ws <*> pVF <* ws <* char '$' <* ws <*> (sepEndBy1 (pVN <|> pVT) wx) where
+  f l f rs = Rule l f rs
+  pVN = VSym <$> sepBy1 pN (char ',')
+  pVT = VSym <$> sepBy1 pT (char ',')
+  pVF = (\fs -> VFun [f | VFun [f] <- fs]) <$> sepBy1 pFun (char ',')
 
 -- | Parse a product description
 
 pProduct = do
   n <- (:) <$ string "Product:" <* ws <*> letter <*> some alphaNum <* newline
   p <- string "Prod:" *> ws *> pProductOps <* newline
-  rs <- sepEndBy1 pDelete newline
+  rs <- sepEndBy1 (pDelete <|> pAddRule) newline
+  let ds = lefts $ concat rs
+  let rules = rights $ concat rs
   pLast
   return $ GProduct
     { pname = n
     , pprod = p
-    , pdels = concat $ rs
+    , pdels = ds
+    , prules = rules
     }
 --  return (n,p,rs)
 

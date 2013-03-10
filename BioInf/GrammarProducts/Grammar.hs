@@ -71,6 +71,7 @@ data GProduct = GProduct
   { pname :: String
   , pprod :: [ProdOps]
   , pdels :: [VSym]
+  , prules :: [Rule]
   }
   deriving (Eq,Ord,Show,Data,Typeable)
 

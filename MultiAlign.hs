@@ -40,6 +40,7 @@ N: X
 T: p
 T: a
 T: -
+T: e
 F: f
 F: g
 X -> f $ X p a
@@ -48,6 +49,7 @@ X -> g $ X p -
 Product: Prod
 Prod: Test1 * Test1 * Test1 * Test1
 remove: -,-,-,-
+addrule: X,X,X,X -> h,h,h,h $ e,e,e,e
 //
 |]
 

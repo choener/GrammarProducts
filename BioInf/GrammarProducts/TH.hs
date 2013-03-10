@@ -34,6 +34,7 @@ import Data.List
 import Data.Char
 import Data.Function
 import Data.Foldable (foldlM)
+import qualified Data.Map as M
 
 import BioInf.GrammarProducts.Parser
 import BioInf.GrammarProducts.Grammar
@@ -133,11 +134,11 @@ grammarDecQ g@Grammar{..} = do
 --  blargs <- mkTermCtor $ tnames
 --  TH.reportWarning $ show $ blargs
   -- arguments to capture: (i) functions to apply, (ii) non-terminals (actually the memoization data structure), (iii) terminal data (NOT terminal symbol, those are created here)
-  let args = [ tupP (map (varP . snd) fnames) -- (i) all functions are now bound
-             , tupP (map (varP . snd) nnames)
-             , tupP (map (varP . snd) tnames)
+  let args = [ -- tupP (map (varP . snd) fnames) -- (i) all functions are now bound
+--             , tupP (map (varP . snd) nnames)
+--             , tupP (map (varP . snd) tnames)
              ]
-  let gbody = tupE $ rulesToTupleQ g fnames nnames tnames
+  let gbody = tupE [] -- $ rulesToTupleQ g fnames nnames tnames
   -- the expression (capture arguments and the resulting RHS)
   let e = lamE args gbody
   -- the outermost part in creating the grammar
@@ -145,6 +146,34 @@ grammarDecQ g@Grammar{..} = do
   -- g = b where ds
   g <- valD (varP gname) (normalB e) []
   return g
+
+-- | create one ADPfusion rule.
+
+mkRule :: Names -> Rule -> ExpQ
+mkRule Names{..} (Rule lhs f rhs) = do
+  let stack = let go :: ExpQ -> ExpQ -> ExpQ
+                  go g r = infixE (Just g) (conE $ mkName "%") (Just r)
+              in  foldl1' go $ map (vsymToExpQ M.!) rhs
+  infixE (Just $ vfunToExpQ M.! f) (conE $ mkName "<<<") (Just $ stack)
+
+-- | Join different rules by using @(|||)@ and @(...)@ providing a complete
+-- right-part for a grammar non-terminal.
+
+mkADPproductions :: Names -> [Rule] -> VFun -> ExpQ
+mkADPproductions Names{..} rules h = do
+  undefined
+
+-- | Creates the 'Names' object. We want to be able to take, say, a 'Rule' and
+-- easily construct the ADPfusion representation. For this we need access to
+-- the 'Name' associated with symbols and other things.
+
+mkNames :: Grammar -> Q Names
+mkNames = undefined
+
+data Names = Names
+  { vfunToExpQ :: M.Map VFun ExpQ
+  , vsymToExpQ :: M.Map VSym ExpQ
+  }
 
 rulesToTupleQ :: Grammar -> [(VFun,Name)] -> [(VSym,Name)] -> [((String,Int),Name)] -> [ExpQ]
 rulesToTupleQ g@Grammar{..} fn nn tn = map ruleGen $ groupBy ((==) `on` _lhs) $ rules where
@@ -183,7 +212,7 @@ mkTermCtor ts (VSym xs) = do
 -- [a_0,a_1,a_2].
 
 terminalBinders :: [VSym] -> [(String,Int)]
-terminalBinders = filter (("-"/=).fst) . nub . concat . map terminalBinder where
+terminalBinders = {- filter (("-"/=).fst) . -} nub . concat . map terminalBinder where
 
   -- associate each terminal symbol with a dimension
 
@@ -197,7 +226,7 @@ terminalBinder (VSym ts) = zip (map _n ts) [0..]
 -- your own version of 'foldGrammars' and give that to the TH system.
 
 foldGrammars :: GrammarOperations -> [Grammar] -> GProduct -> Grammar
-foldGrammars gOps gs p = rename $ delete $ initial $ pprod p where
+foldGrammars gOps gs p = rename $ addRules $ delete $ initial $ pprod p where
   rename g = g {name = pname p}
   delete g = g {rules = filter (\(Rule l f rs) -> null $ intersect (pdels p) rs) $ rules g}
   initial []  = error $ "specified empty product: " ++ show (pprod p)
@@ -210,6 +239,7 @@ foldGrammars gOps gs p = rename $ delete $ initial $ pprod p where
     , Just f <- lookup o (productOperations gOps)
     = go (f g1 g2) ps
   go _ (ProdGr g : _) = error $ "wrong order in product term: " ++ show p
+  addRules newG = newG{ rules = rules newG ++ prules p}
 
 -- *** grammar-structure prettyprinter QQ
 
