@@ -37,7 +37,9 @@ main = return ()
 [qqGDhere|
 Grammar: Test1
 N: X
-T: p a -
+T: p
+T: a
+T: -
 F: f
 X -> f $ X p a
 X -> f $ X p -

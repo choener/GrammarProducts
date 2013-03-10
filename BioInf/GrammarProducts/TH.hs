@@ -31,9 +31,13 @@ import Data.Data
 import Data.Data.Lens
 import Data.Typeable
 import Data.List
+import Data.Char
+import Data.Function
+import Data.Foldable (foldlM)
 
 import BioInf.GrammarProducts.Parser
 import BioInf.GrammarProducts.Grammar
+
 
 
 -- ** QuasiQuoters
@@ -74,11 +78,24 @@ qqTesting gOps s = do
         TH.reportWarning $ unlines ["","have successfully parsed product object ...", show p]
         -- at this point we have at least one grammar and exactly one product description
         let c = foldGrammars gOps gs p
-        TH.reportWarning $ unlines [ ""
-                                   , "have successfully constructed product ..."
-                                   , show c
+        TH.reportWarning $ unlines $ [ ""
+                                     , "have successfully constructed product ..."
+                                     , ""
+                                     , "terminals:"
+                                     ] ++ (map show (terminals c)) ++ ["", "non-terminals:"]
+                                     ++ (map show (nonterms c)) ++ ["", "rules:"]
+                                     ++ (map show (rules c))
+                                   {-
+--                                   , show c
+                                   , show $ terminals c
+                                   , show $ nonterms c
                                    , "number of rules: " ++ show (length $ rules c)
-                                   ]
+                                   ] -}
+        cg <- grammarDecQ c
+        return
+          [ cg
+          ]
+        {-
         bla <- TH.runQ [d| ggggg a b c = (a,b,c) |]
         let gname = TH.mkName $ "g" -- ++ name s
         -- TODO Baustelle:
@@ -94,27 +111,89 @@ qqTesting gOps s = do
           [ g   -- write the grammar itself
           , inl -- inline the grammar
           ] ++ bla
+          -}
+
+sanitize :: String -> String
+sanitize = f . filter isAlphaNum where
+  f [] = []
+  f (x:xs) = toLower x : xs
 
 -- | Create a grammar declaration from a 'Grammar' object
+--
+-- TODO add INLINE pragma!
 
 grammarDecQ :: Grammar -> DecQ
-grammarDecQ Grammar{..} = do
+grammarDecQ g@Grammar{..} = do
   let gname = mkName $ "g" ++ name
-  -- creating a lookup storage for 'Grammar' function names to TH 'new
-  fnames <- sequence [ newName f >>= \z -> return (f,z) | f <- functions ]
+  -- creating a lookup storage for 'Grammar' function names to TH 'newName's.
+  -- We don't want to inadvertantly capture something from the outside
+  fnames <- sequence [ newName (sanitize f) >>= \z -> return (f,z) | f <- functions ]
+  TH.reportWarning $ show fnames
+  -- non-terminal names
+  nnames <- sequence [ newName (sanitize $ show n) >>= \z -> return (n,z) | n <- nonterms ]
+  TH.reportWarning $ show nnames
+  -- all the terminal names, each dimension is bound separately
+  let tbs = terminalBinders terminals
+  tnames <- sequence [ newName (sanitize $ show t) >>= \z -> return (t,z) | t <- tbs ]
+  TH.reportWarning $ show tnames
+--  blargs <- mkTermCtor $ tnames
+--  TH.reportWarning $ show $ blargs
   -- arguments to capture: (i) functions to apply, (ii) non-terminals (actually the memoization data structure), (iii) terminal data (NOT terminal symbol, those are created here)
-  --
-  -- (i)
-  let fs = tupP [] -- put all functions in here
-  let args = [fs]
-  let gbody = undefined
+  let args = [ tupP (map (varP . snd) fnames) -- (i) all functions are now bound
+             , tupP (map (varP . snd) nnames)
+             , tupP (map (varP . snd) tnames)
+             ]
+  let gbody = tupE $ rulesToTupleQ g fnames nnames tnames
   -- the expression (capture arguments and the resulting RHS)
   let e = lamE args gbody
   -- the outermost part in creating the grammar
   -- valD (g::Pat) (b::Body) (ds::[Dec]) ==>
   -- g = b where ds
   g <- valD (varP gname) (normalB e) []
-  return undefined
+  return g
+
+rulesToTupleQ :: Grammar -> [(String,Name)] -> [(VSym,Name)] -> [((String,Int),Name)] -> [ExpQ]
+rulesToTupleQ g@Grammar{..} fn nn tn = map ruleGen $ groupBy ((==) `on` _lhs) $ rules where
+  ruleGen [] = error $ "empty rules in grammar: " ++ show g
+  ruleGen rs@(r:_) = tupE [theNT r, theProductions rs]
+  theNT r
+    | Just n <- lookup (_lhs r) nn = varE n -- TODO bound to actual nam, NOT wrapped in 'MTable' for now!!!
+  theProductions rs = tupE [] --undefined
+
+-- | Build a terminal constructor
+--
+-- TODO This function should later be generalized and given a set of
+-- constructor names to use (meaning that in the grammar description we want to
+-- tag each terminal with the terminal type we would like to use).
+
+mkTermCtor :: [((String,Int),Name)] -> VSym -> ExpQ
+mkTermCtor ts (VSym xs) = do
+  TH.reportWarning $ show ts
+  let t = foldl' go (conE $ mkName "T") (zip xs [0..]) -- (map (conE . snd) ts)
+  appE (conE $ mkName "Term") $ t
+  where
+    go :: ExpQ -> (Sym, Int) -> ExpQ
+    go x (Sym T s,k)
+      | Just n <- lookup (s,k) ts
+      , Just trm <- lookup s trmCtors = infixE (Just x) (conE $ mkName ":.") (Just trm)
+      | otherwise = error $ "can't build TermCtor for: " ++ show (VSym xs) -- = infixE (Just x) (conE $ mkName ":.") (Just n)
+    trmCtors = [ ("p", conE $ mkName "Peek")
+               , ("a", conE $ mkName "Chr")
+               , ("-", conE $ mkName "Deletion")    -- TODO need to write "Deletion" data constructor in ADPfusion
+               ]
+
+-- | Associate terminal names in VSym's with a "dimension" and the name itself,
+-- thereby returning the list of unique binders.
+--
+-- Example: T:a.a.a becomes (T:a.a.a, (a_0,a_1,a_2)) and the unique binders are
+-- [a_0,a_1,a_2].
+
+terminalBinders :: [VSym] -> [(String,Int)]
+terminalBinders = filter (("-"/=).fst) . nub . concat . map terminalBinder where
+
+  -- associate each terminal symbol with a dimension
+
+terminalBinder (VSym ts) = zip (map _n ts) [0..]
 
 -- | Folds different grammars using the grammar product operation.
 --

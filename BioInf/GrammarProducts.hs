@@ -74,13 +74,17 @@ qqGDhere = qqGD $ GrammarOperations
 grammarProduct :: Grammar -> Grammar -> Grammar
 grammarProduct x y = Grammar
   { name = name x ++ "-" ++ name y
-  , terminals = [ VSym $ a++b | VSym a <- terminals x, VSym b <- terminals y ]
-  , nonterms  = [ VSym $ a++b | VSym a <- terminals x, VSym b <- terminals y ]
+  , terminals = filter (isActive rs) $ [ VSym $ a++b | VSym a <- terminals x, VSym b <- terminals y ]
+  , nonterms  = filter (isActive rs) $ [ VSym $ a++b | VSym a <- nonterms x , VSym b <- nonterms y  ]
   , functions = [ fx ++ fy | fx <- functions x, fy <- functions y ]
-  , rules     = [ Rule (VSym $ a++b) (f++"_"++g) (ruleProduct as bs)
-                | Rule (VSym a) f as <- rules x
-                , Rule (VSym b) g bs <- rules y ]
-  }
+  , rules     = rs
+  } where
+    rs = [ Rule (VSym $ a++b) (f++"_"++g) (ruleProduct as bs)
+         | Rule (VSym a) f as <- rules x
+         , Rule (VSym b) g bs <- rules y ]
+
+isActive :: [Rule] -> VSym -> Bool
+isActive rs s = s `elem` (concat [ rhs | Rule _ _ rhs <- rs ])
 
 -- |
 

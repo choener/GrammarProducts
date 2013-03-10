@@ -7,6 +7,7 @@ import Control.Lens
 import Data.Data
 import Data.Data.Lens
 import Data.Typeable
+import Data.List
 
 
 
@@ -33,11 +34,19 @@ symN = Sym N
 symT = Sym T
 
 newtype VSym = VSym [Sym]
-  deriving (Eq,Ord,Show,Data,Typeable)
+  deriving (Eq,Ord,Data,Typeable)
+
+instance Show VSym where
+  show (VSym []) = ""
+  show (VSym xs@(Sym t n:_)) = show t ++ ":" ++ (concat . intersperse "." . map _n $ xs)
 
 -- | full production rule
 
-data Rule = Rule VSym String [VSym]
+data Rule = Rule
+  { _lhs :: VSym
+  , _fun :: String
+  , _rhs :: [VSym]
+  }
   deriving (Eq,Ord,Show,Data,Typeable)
 
 -- | full grammar
