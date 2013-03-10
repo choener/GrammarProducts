@@ -85,12 +85,6 @@ qqTesting gOps s = do
                                      ] ++ (map show (terminals c)) ++ ["", "non-terminals:"]
                                      ++ (map show (nonterms c)) ++ ["", "rules:"]
                                      ++ (map show (rules c))
-                                   {-
---                                   , show c
-                                   , show $ terminals c
-                                   , show $ nonterms c
-                                   , "number of rules: " ++ show (length $ rules c)
-                                   ] -}
         cg <- grammarDecQ c
         return
           [ cg
@@ -127,7 +121,7 @@ grammarDecQ g@Grammar{..} = do
   let gname = mkName $ "g" ++ name
   -- creating a lookup storage for 'Grammar' function names to TH 'newName's.
   -- We don't want to inadvertantly capture something from the outside
-  fnames <- sequence [ newName (sanitize f) >>= \z -> return (f,z) | f <- functions ]
+  fnames <- sequence [ newName (sanitize $ show f) >>= \z -> return (f,z) | f <- functions ]
   TH.reportWarning $ show fnames
   -- non-terminal names
   nnames <- sequence [ newName (sanitize $ show n) >>= \z -> return (n,z) | n <- nonterms ]
@@ -135,7 +129,7 @@ grammarDecQ g@Grammar{..} = do
   -- all the terminal names, each dimension is bound separately
   let tbs = terminalBinders terminals
   tnames <- sequence [ newName (sanitize $ show t) >>= \z -> return (t,z) | t <- tbs ]
-  TH.reportWarning $ show tnames
+  TH.reportWarning $ unlines $ ["","bound terminal names:"] ++ map show tnames
 --  blargs <- mkTermCtor $ tnames
 --  TH.reportWarning $ show $ blargs
   -- arguments to capture: (i) functions to apply, (ii) non-terminals (actually the memoization data structure), (iii) terminal data (NOT terminal symbol, those are created here)
@@ -152,7 +146,7 @@ grammarDecQ g@Grammar{..} = do
   g <- valD (varP gname) (normalB e) []
   return g
 
-rulesToTupleQ :: Grammar -> [(String,Name)] -> [(VSym,Name)] -> [((String,Int),Name)] -> [ExpQ]
+rulesToTupleQ :: Grammar -> [(VFun,Name)] -> [(VSym,Name)] -> [((String,Int),Name)] -> [ExpQ]
 rulesToTupleQ g@Grammar{..} fn nn tn = map ruleGen $ groupBy ((==) `on` _lhs) $ rules where
   ruleGen [] = error $ "empty rules in grammar: " ++ show g
   ruleGen rs@(r:_) = tupE [theNT r, theProductions rs]

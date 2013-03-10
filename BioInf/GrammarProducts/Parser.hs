@@ -40,10 +40,11 @@ pTdefn = string "T:" *> ws *> sepBy1 pT ws
 
 -- | Functions
 
-pFuns :: CharParsing f => f [String]
+pFuns :: CharParsing f => f [VFun]
 pFuns = string "F:" *> ws *> sepBy1 pFun ws
 
-pFun = (:) <$> lower <*> many letter
+pFun = f <$> lower <*> many letter where
+  f c cs = VFun [c:cs]
 
 -- | Grammar name
 

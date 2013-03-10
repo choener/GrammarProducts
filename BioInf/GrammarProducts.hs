@@ -76,12 +76,12 @@ grammarProduct x y = Grammar
   { name = name x ++ "-" ++ name y
   , terminals = filter (isActive rs) $ [ VSym $ a++b | VSym a <- terminals x, VSym b <- terminals y ]
   , nonterms  = filter (isActive rs) $ [ VSym $ a++b | VSym a <- nonterms x , VSym b <- nonterms y  ]
-  , functions = [ fx ++ fy | fx <- functions x, fy <- functions y ]
+  , functions = [ VFun $ fx ++ fy | VFun fx <- functions x, VFun fy <- functions y ]
   , rules     = rs
   } where
-    rs = [ Rule (VSym $ a++b) (f++"_"++g) (ruleProduct as bs)
-         | Rule (VSym a) f as <- rules x
-         , Rule (VSym b) g bs <- rules y ]
+    rs = [ Rule (VSym $ a++b) (VFun $ f++g) (ruleProduct as bs)
+         | Rule (VSym a) (VFun f) as <- rules x
+         , Rule (VSym b) (VFun g) bs <- rules y ]
 
 isActive :: [Rule] -> VSym -> Bool
 isActive rs s = s `elem` (concat [ rhs | Rule _ _ rhs <- rs ])

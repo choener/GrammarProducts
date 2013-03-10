@@ -40,11 +40,16 @@ instance Show VSym where
   show (VSym []) = ""
   show (VSym xs@(Sym t n:_)) = show t ++ ":" ++ (concat . intersperse "." . map _n $ xs)
 
+-- | multi-dimensional function
+
+newtype VFun = VFun [String]
+  deriving (Eq,Ord,Show,Data,Typeable)
+
 -- | full production rule
 
 data Rule = Rule
   { _lhs :: VSym
-  , _fun :: String
+  , _fun :: VFun
   , _rhs :: [VSym]
   }
   deriving (Eq,Ord,Show,Data,Typeable)
@@ -55,7 +60,7 @@ data Grammar = Grammar
   { name      :: String
   , terminals :: [VSym]
   , nonterms  :: [VSym]
-  , functions :: [String]
+  , functions :: [VFun]
   , rules     :: [Rule]
   }
   deriving (Eq,Ord,Show,Data,Typeable)
