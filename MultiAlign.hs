@@ -53,6 +53,21 @@ addrule: X,X,X,X -> h,h,h,h $ e,e,e,e
 //
 |]
 
+{-
+Grammar: Test1
+X -> f $ X p a
+X -> g $ X p -
+//
+Grammar: Test2
+X -> h $ e
+//
+Grammar: Test3
+X -> i $ -
+Product: Prod
+Prod: Test1 ^>< 4   `union`   Test2 ^>< 4   \\   Test3 ^>< 4
+//
+-}
+
 
 allTuples = $(subtuples 4 2)
 {-
