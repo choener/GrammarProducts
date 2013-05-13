@@ -1,8 +1,17 @@
 Grammar: DNA
 
-NT: F{i|3}
+{-
+Need to declare all non-terminals and terminals. F{3} declares three
+non-terminals: F_0, F_1, F_2
+-}
+
+NT: F{3}
 T:  c
--- '-' is a place holder only
+-- '-' is a placeholder only
+
+{-
+F{i} expands to F_0, F_1, F_2, and F{i+1} expands to F_1, F_2, F_0.
+-}
 
 F{i} -> stay <<< F{i}   c c c
 F{i} -> orf1 <<< F{i+1} c c -

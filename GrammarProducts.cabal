@@ -61,7 +61,9 @@ library
     repa,
     tuple-th,
     algebra,
-    transformers
+    transformers,
+    parsers,
+    unordered-containers
   exposed-modules:
     BioInf.GrammarProducts
   ghc-options:
