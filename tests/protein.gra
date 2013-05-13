@@ -1,0 +1,31 @@
+Grammar: DNA
+
+NT: F{i|3}
+T:  c
+-- '-' is a place holder only
+
+F{i} -> stay <<< F{i}   c c c
+F{i} -> orf1 <<< F{i+1} c c -
+F{i} -> orf2 <<< F{i+2} c - -
+
+//
+
+
+
+Grammar: Protein
+
+NT: P
+T:  a
+
+P -> amino <<< P a
+P -> del   <<< P -
+
+//
+
+
+
+Product: DNA-Protein
+
+DNA >< Protein
+
+//
