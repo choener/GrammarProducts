@@ -47,7 +47,6 @@ library
   build-depends:
     base >= 4 && < 5,
     template-haskell          ,
-    mtl            >= 2       ,
     primitive      >= 0.5     ,
     vector         >= 0.10    ,
 --    PrimitiveArray >= 0.5.0.0 ,
@@ -60,44 +59,12 @@ library
     ghc-prim ,
     bytestring ,
     repa,
-    tuple-th
+    tuple-th,
+    algebra,
+    transformers
   exposed-modules:
     BioInf.GrammarProducts
   ghc-options:
---    -Odph
---    -funbox-strict-fields -fspec-constr
---    -funfolding-use-threshold100
---    -funfolding-keeness-factor100
---    -fno-spec-constr-threshold -fspec-constr-count=20
---
---    -fnew-codegen
---    -fllvm
---    -optlo-O3
---    -optlo-std-compile-opts
-
-
-
-executable MultiAlign
-  build-depends:
-  main-is:
-    MultiAlign.hs
-  other-modules:
---    BioInf.GrammarProducts
-  ghc-options:
---    -Odph
---    -funbox-strict-fields -fspec-constr
---    -funfolding-use-threshold100
---    -funfolding-keeness-factor100
---    -fno-spec-constr-threshold -fspec-constr-count=20
---
---    -fnew-codegen
---    -fllvm
---    -optlo-O3
---    -optlo-std-compile-opts
-
-
-
--- executable GrammarProduct
 
 
 
