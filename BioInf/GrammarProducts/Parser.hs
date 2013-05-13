@@ -1,3 +1,5 @@
+{-# LANGUAGE RankNTypes #-}
+{-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE NoMonomorphismRestriction #-}
 {-# LANGUAGE OverloadedStrings #-}
@@ -16,52 +18,83 @@ import Control.Lens
 import qualified Data.HashSet as H
 import Control.Monad (MonadPlus(..))
 import Control.Monad.Trans.Class
+import Control.Monad.Trans.State.Strict
+import Debug.Trace
+import Data.Set (Set)
+import qualified Data.Set as S
+import Data.Default
 
 import BioInf.GrammarProducts.Grammar
 
 
 
--- | Include 'StateT' that lets use store the modulus for each NT
+data GS = GS
+  { _ntsyms :: Set NTSym
+  , _tsyms  :: Set TSym
+  , _gs :: Int
+  }
+  deriving (Show)
+
+instance Default GS where
+  def = GS
+    { _ntsyms = def
+    , _tsyms  = def
+    , _gs     = def
+    }
+
+makeLenses ''GS
+
+
+
+-- |
 --
 -- TODO complain on indexed NTs with modulus '1'
 
-grammar :: (Monad m, TokenParsing m) => m String
+grammar :: Parse String
 grammar = do
   reserve gi "Grammar:"
   n <- ident gi
   (nts,ts) <- partitionEithers <$> ntsts
+--  rs <- rules
   return n
 
-ntsts :: (Monad m, TokenParsing m) => m [Either () ()]
-ntsts = some (Left <$> nts <|> Right <$> ts)
+rules :: (Monad m, TokenParsing m) => m [()]
+rules = undefined
+
+ntsts :: Parse [Either NTSym TSym]
+ntsts = concat <$> some (map Left <$> nts <|> map Right <$> ts)
 
 -- |
 --
 -- TODO expand @NT@ symbols here or later?
 
-nts :: (Monad m, TokenParsing m) => m ()
+nts :: Parse [NTSym]
 nts = do
   reserve gi "NT:"
   n <- ident gi
-  mdl <- option 1 $ braces natural
-  return ()
+  mdl <- option 1 $ braces (fromIntegral <$> natural)
+  let zs = map (NTSym n mdl) [0 .. mdl-1]
+  ntsyms <>= S.fromList zs
+  return zs
 
-ts :: (Monad m, TokenParsing m) => m ()
+ts :: Parse [TSym]
 ts = do
   reserve gi "T:"
   n <- ident gi
-  return ()
+  let z = TSym n
+  tsyms <>= S.singleton z
+  return [z]
 
 
 test :: IO ()
 test = do
-  gs <- parseFromFile (runGrammarLang $ some grammar <* eof) "./tests/protein.gra"
+  gs <- parseFromFile (runGrammarLang $ flip evalStateT def $ some grammar <* eof) "./tests/protein.gra"
   print gs
 
 gi = set styleReserved rs emptyIdents where
   rs = H.fromList ["Grammar:", "NT:", "T:"]
 
-newtype GrammarLang m a = GrammarLang { runGrammarLang :: m a }
+newtype GrammarLang m a = GrammarLang {runGrammarLang :: m a }
   deriving (Functor,Applicative,Alternative,Monad,MonadPlus,Parsing,CharParsing)
 
 instance MonadTrans GrammarLang where
@@ -70,3 +103,6 @@ instance MonadTrans GrammarLang where
 
 instance TokenParsing m => TokenParsing (GrammarLang m) where
   someSpace = GrammarLang $ someSpace `buildSomeSpaceParser` haskellCommentStyle
+
+type Parse a = (Monad m, TokenParsing m, MonadPlus m) => StateT GS m a
+

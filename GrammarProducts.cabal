@@ -63,7 +63,8 @@ library
     algebra,
     transformers,
     parsers,
-    unordered-containers
+    unordered-containers,
+    data-default
   exposed-modules:
     BioInf.GrammarProducts
   ghc-options:

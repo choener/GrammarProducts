@@ -9,8 +9,15 @@ import Control.Lens.TH
 
 
 
-newtype NTSym = NTSym String
+data NTSym = NTSym
+  { _name    :: String
+  , _modulus :: Int
+  , _index   :: Int
+  }
+  deriving (Show,Eq,Ord)
+
 newtype TSym  = TSym  String
+  deriving (Show,Eq,Ord)
 
 data NtT
   = Nt
@@ -36,4 +43,4 @@ data Grammar = Grammar
 makeLenses ''Grammar
 makeLenses ''PR
 makeLenses ''NtT
-
+makeLenses ''NTSym

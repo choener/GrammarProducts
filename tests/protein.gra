@@ -10,7 +10,11 @@ T:  c
 -- '-' is a placeholder only
 
 {-
-F{i} expands to F_0, F_1, F_2, and F{i+1} expands to F_1, F_2, F_0.
+F{i} -> rhs
+expands to
+F_0 -> rhs (i=0)
+F_1 -> rhs (i=1)
+F_2 -> rhs (i=2)
 -}
 
 F{i} -> stay <<< F{i}   c c c
