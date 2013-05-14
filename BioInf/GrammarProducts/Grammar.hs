@@ -11,8 +11,8 @@ import Control.Lens.TH
 
 data NTSym = NTSym
   { _name    :: String
-  , _modulus :: Int
-  , _index   :: Int
+  , _modulus :: Integer
+  , _index   :: Integer
   }
   deriving (Show,Eq,Ord)
 
