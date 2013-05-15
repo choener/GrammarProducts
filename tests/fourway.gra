@@ -1,0 +1,35 @@
+Grammar: Word
+
+NT: X
+T:  a
+T:  p
+
+X -> p a X
+X ->     X
+X ->   a
+
+//
+
+
+
+Grammar: Del
+
+NT: X
+
+X -> X
+
+//
+
+
+
+{-
+Produce four-way alignments, but remove the case where we map the non-terminal
+directly onto itself.
+-}
+
+Product: Fourwary
+
+Word ^>< 4   -   Del ^>< 4
+
+//
+
