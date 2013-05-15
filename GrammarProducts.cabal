@@ -64,7 +64,8 @@ library
     transformers,
     parsers,
     unordered-containers,
-    data-default
+    data-default,
+    newtype
   exposed-modules:
     BioInf.GrammarProducts
   ghc-options:

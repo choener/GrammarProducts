@@ -32,8 +32,11 @@ import Text.Printf
 import Text.Trifecta
 import Text.Trifecta.Delta
 import Text.Trifecta.Result
+import Data.Semigroup ((<>))
+import qualified Control.Newtype as T
 
 import BioInf.GrammarProducts.Grammar
+import BioInf.GrammarProducts.Direct
 
 
 
@@ -63,7 +66,7 @@ expr g = choice [directprod] where
     gl <- choice gts
     reserve gi "><"
     gr <- choice gts
-    return $ error "implement direct product"
+    return . unDirect $ Direct gl <> Direct gr
   gts = map gterm $ M.assocs g
 
 {-
@@ -144,7 +147,7 @@ genPR ln i xs = go where
   go = do
     (l,(m,k)) <- genL i
     r <- genR m k xs
-    return $ PR (l N.:| []) (N.fromList r)
+    return $ PR [l] r
   genL NoIdx = do
     g <- view grammarUid
     return (Nt 1 [NTSym ln 1 0] g, (1,0))
@@ -182,7 +185,7 @@ genPR ln i xs = go where
   genR m k (Right t :rs) = do
     g <- view grammarUid
     rs' <- genR m k rs
-    return (T 1 [[TSym t]] g :rs')
+    return (T 1 [TSym t] g :rs')
 
 ruleNts :: ParseU (String,NtIndex)
 ruleNts = do
