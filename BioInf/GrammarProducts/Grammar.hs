@@ -21,24 +21,28 @@ newtype TSym  = TSym  String
 
 data NtT
   = Nt
-    { _dim  :: Int
+    { _dim  :: Integer
     , _symN :: [NTSym]
-    , _guid :: Int
+    , _guid :: Integer
     }
   | T
-    { _dim  :: Int
+    { _dim  :: Integer
     , _symT :: [[TSym]]
-    , _guid :: Int
+    , _guid :: Integer
     }
+  deriving (Show,Eq,Ord)
 
 data PR = PR
   { _lhs :: NonEmpty NtT
   , _rhs :: NonEmpty NtT
   }
+  deriving (Show,Eq,Ord)
 
 data Grammar = Grammar
-  { _ps  :: Set PR
+  { _ps    :: Set PR
+  , _gname :: String
   }
+  deriving (Show)
 
 makeLenses ''Grammar
 makeLenses ''PR

@@ -7,7 +7,7 @@ non-terminals: F_0, F_1, F_2
 
 NT: F{3}
 T:  c
--- '-' is a placeholder only
+T:  e
 
 {-
 F{i} -> rhs
@@ -17,9 +17,11 @@ F_1 -> rhs (i=1)
 F_2 -> rhs (i=2)
 -}
 
-F{i} -> stay <<< F{i}   c c c
-F{i} -> orf1 <<< F{i+1} c c
-F{i} -> orf2 <<< F{i+2} c
+F{i} -> stay <<< c c c F{i}
+F{i} -> orf1 <<< c c   F{i+1}
+F{i} -> orf2 <<< c     F{i+2}
+
+F{0} -> empty <<< e
 
 //
 
@@ -29,16 +31,19 @@ Grammar: Protein
 
 NT: P
 T:  a
+T:  e
 
-P -> amino <<< P a
-P -> del   <<< P
+P -> amino <<< a P
+P -> del   <<<   P
+P -> empty <<< e
 
 //
 
 
 
-Product: DNA-Protein
+Product: DNAProtein
 
 DNA >< Protein
 
 //
+
