@@ -125,6 +125,8 @@ grammar = do
 
 -- | Parse a single rule. Some rules come attached with an index. In that case,
 -- each rule is inflated according to its modulus.
+--
+-- TODO add @fun@ to each PR
 
 rule :: Parse [PR]
 rule = do
@@ -210,7 +212,7 @@ ruleTs :: ParseU String
 ruleTs = do
   n <- ident gi <?> "rule: terminal identifier"
   lift $ uses tsyms (S.member n) >>= guard <?> (printf "undeclared T: %s" n)
-  return $ show (n)
+  return n
 
 ntsts :: Parse [Either NTSym TSym]
 ntsts = concat <$> some (map Left <$> nts <|> map Right <$> ts)
@@ -242,15 +244,6 @@ parseDesc = do
   ps <- some (gprod g)
   eof
   return (gs,ps)
-
-test :: IO ()
-test = do
-  pff <- parseFromFile (runGrammarLang $ flip evalStateT def $ parseDesc) "./tests/protein.gra"
-  case pff of
-    Nothing -> return ()
-    Just (gs,ps) -> do
-      print gs
-      print ps
 
 gi = set styleReserved rs emptyIdents where
   rs = H.fromList ["Grammar:", "NT:", "T:"]

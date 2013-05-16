@@ -65,7 +65,9 @@ library
     parsers,
     unordered-containers,
     data-default,
-    newtype
+    newtype,
+    HaTeX,
+    text
   exposed-modules:
     BioInf.GrammarProducts
   ghc-options:

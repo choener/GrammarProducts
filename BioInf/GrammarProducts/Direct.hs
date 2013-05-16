@@ -62,6 +62,8 @@ mergeRHS ls' rs' = concat $ go (groupRHS ls') (groupRHS rs') where
         let [Nt dll nls _] = l
             [Nt drr nrs _] = r
         in  [Nt (dll+drr) (nls++nrs) 0] : go ls rs
+    | all isT l   = go [l] [] ++ go ls (r:rs)
+    | all isT r   = go [] [r] ++ go (l:ls) rs
     | otherwise   = go [l] [] ++ go [] [r] ++ go ls rs
   goT [] [] = []
   goT [] (T d ts _ :rs) = T (dl+d) (genericReplicate dl epsilonTSym ++ ts) 0 : goT [] rs

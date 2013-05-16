@@ -7,7 +7,7 @@ non-terminals: F_0, F_1, F_2
 
 NT: F{3}
 T:  c
-T:  e
+T:  epsilon
 
 {-
 F{i} -> rhs
@@ -21,7 +21,7 @@ F{i} -> stay <<< c c c F{i}
 F{i} -> orf1 <<< c c   F{i+1}
 F{i} -> orf2 <<< c     F{i+2}
 
-F{0} -> empty <<< e
+F{i} -> empty <<< epsilon
 
 //
 
@@ -31,11 +31,11 @@ Grammar: Protein
 
 NT: P
 T:  a
-T:  e
+T:  epsilon
 
 P -> amino <<< a P
 P -> del   <<<   P
-P -> empty <<< e
+P -> empty <<< epsilon
 
 //
 
