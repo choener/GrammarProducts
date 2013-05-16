@@ -72,6 +72,12 @@ library
     BioInf.GrammarProducts
   ghc-options:
 
+executable GramProd
+  build-depends:
+    cmdargs == 0.10.*
+  main-is:
+    GramProd.hs
+
 
 
 source-repository head
