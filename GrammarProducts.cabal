@@ -67,9 +67,15 @@ library
     data-default,
     newtype,
     HaTeX,
-    text
+    text,
+    ansi-wl-pprint
   exposed-modules:
     BioInf.GrammarProducts
+    BioInf.GrammarProducts.Direct
+    BioInf.GrammarProducts.Grammar
+    BioInf.GrammarProducts.Helper
+    BioInf.GrammarProducts.LaTeX
+    BioInf.GrammarProducts.Parser
   ghc-options:
 
 executable GramProd
