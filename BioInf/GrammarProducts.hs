@@ -7,6 +7,7 @@ import Data.Default
 import Text.LaTeX.Base.Syntax (LaTeX)
 import Text.LaTeX.Base.Render (render,renderFile,renderAppend)
 import qualified Data.Text.IO as T
+import Data.Monoid
 
 import BioInf.GrammarProducts.Grammar
 import BioInf.GrammarProducts.Parser
@@ -22,7 +23,7 @@ test = do
       print gs
       print ps
       -- mapM_ (\g -> rg g >> putStrLn "") (gs ++ ps)
-      renderFile "../Paper-GrammarProducts/tmp.tex" (rgt $ ps !! 0) -- (renderAppend (map renderGrammarLaTeX $ gs++ps))
+      renderFile "../Paper-GrammarProducts/tmp.tex" (mconcat $ map rgt $ gs ++ ps) -- (renderAppend (map renderGrammarLaTeX $ gs++ps))
 
 rgt = renderGrammarLaTeX
 

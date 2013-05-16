@@ -21,7 +21,7 @@ renderGrammarLaTeX = renderGrammar
 -- | Transform a grammar to some LaTeX code.
 
 renderGrammar :: LaTeXC l => Grammar -> l
-renderGrammar (Grammar ps gname) = align xs where
+renderGrammar (Grammar ps gname) = subsubsection (raw $ pack gname) <> raw "\n" <> align xs <> raw "\n" where
   xs = [ (renderNtT l, mconcat (map renderNtT r)) | PR [l] r <- toList ps ]
 
 -- | Transform a single terminal or non-terminal.
@@ -34,16 +34,16 @@ renderNtT = go
     ll = raw "\\begingroup \\left ( \\begin{smallmatrix}"
     rr = raw "\\end{smallmatrix} \\right ) \\endgroup" where
     special x
-      | x == "epsilon" = epsilon
-      | null x         = raw $ pack "-"
-      | otherwise      = raw $ pack x
+      | x == "empty" = epsilon
+      | null x       = raw $ pack "-"
+      | otherwise    = raw $ pack x
     tstex ts = mci [ special z | TSym z <- ts ]
     nstex ns = mci [ if m<=1 then special n
                              else special n !: (raw $ pack $ show i)
                    | NTSym n m i <- ns
                    ]
 
-mci = mconcat . intersperse (raw "\\\\")
+mci = mconcat . intersperse (raw "\\\\\n")
 
 align :: LaTeXC l => [(l,l)] -> l
 align = (liftL $ TeXEnv "align" []) . go where
