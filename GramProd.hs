@@ -46,7 +46,7 @@ main = do
         when withatoms $ mapM_ latex gs
         mapM_ latex ps
       Haskell{..} -> do
-        return ()
+        error "might wanna implement me"
 
 data Options
   = Latex
@@ -70,3 +70,4 @@ optionLatex = Latex
 optionHaskell = Haskell
   {
   }
+

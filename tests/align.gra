@@ -1,0 +1,31 @@
+
+Grammar: Align
+
+NT: X
+T:  a
+
+X -> X a | X
+
+//
+
+Grammar: Add
+
+NT: X
+T:  empty
+
+X -> empty
+
+//
+
+Grammar: Sub
+
+NT: X
+
+X -> X
+
+Product: Two
+
+Align ^>< 2   +   Add ^>< 2   -   Sub ^>< 2
+
+//
+

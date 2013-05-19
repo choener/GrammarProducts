@@ -1,19 +1,23 @@
 
 module BioInf.GrammarProducts where
 
-import Text.Trifecta (parseFromFile)
 import Control.Monad.Trans.State.Strict
 import Data.Default
-import Text.LaTeX.Base.Syntax (LaTeX)
-import Text.LaTeX.Base.Render (render,renderFile,renderAppend)
-import qualified Data.Text.IO as T
 import Data.Monoid
+import qualified Data.Text.IO as T
+import Text.LaTeX.Base.Render (render,renderFile,renderAppend)
+import Text.LaTeX.Base.Syntax (LaTeX)
+import Text.Trifecta (parseFromFile)
 
 import BioInf.GrammarProducts.Grammar
-import BioInf.GrammarProducts.Parser
-import BioInf.GrammarProducts.Direct
 import BioInf.GrammarProducts.LaTeX
+import BioInf.GrammarProducts.Op.Add
+import BioInf.GrammarProducts.Op.Direct
+import BioInf.GrammarProducts.Op.Scale
+import BioInf.GrammarProducts.Op.Subtract
+import BioInf.GrammarProducts.Parser
 
+{-
 test :: IO ()
 test = do
   pff <- parseFromFile (runGrammarLang $ flip evalStateT def $ parseDesc) "./tests/protein.gra"
@@ -29,3 +33,4 @@ rgt = renderGrammarLaTeX
 
 rg :: Grammar -> IO ()
 rg = T.putStrLn . render . (renderGrammar :: Grammar -> LaTeX)
+-}

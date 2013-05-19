@@ -1,6 +1,6 @@
 {-# LANGUAGE FlexibleInstances #-}
 
-module BioInf.GrammarProducts.Direct where
+module BioInf.GrammarProducts.Op.Direct where
 
 import Control.Newtype
 import Data.Semigroup

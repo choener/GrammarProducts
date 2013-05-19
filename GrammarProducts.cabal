@@ -71,10 +71,13 @@ library
     ansi-wl-pprint
   exposed-modules:
     BioInf.GrammarProducts
-    BioInf.GrammarProducts.Direct
     BioInf.GrammarProducts.Grammar
     BioInf.GrammarProducts.Helper
     BioInf.GrammarProducts.LaTeX
+    BioInf.GrammarProducts.Op.Add
+    BioInf.GrammarProducts.Op.Direct
+    BioInf.GrammarProducts.Op.Scalar
+    BioInf.GrammarProducts.Op.Subtract
     BioInf.GrammarProducts.Parser
   ghc-options:
 

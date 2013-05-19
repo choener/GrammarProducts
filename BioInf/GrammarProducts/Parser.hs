@@ -36,7 +36,7 @@ import Data.Semigroup ((<>))
 import qualified Control.Newtype as T
 
 import BioInf.GrammarProducts.Grammar
-import BioInf.GrammarProducts.Direct
+import BioInf.GrammarProducts.Op.Direct
 
 
 
@@ -99,7 +99,7 @@ gprod g = do
   n <- ident gi
   e <- expr g
   reserve gi "//"
-  return e
+  return $ e & gname .~ n
 
 data Product = Product
   deriving (Show)

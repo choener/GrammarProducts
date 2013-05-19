@@ -4,6 +4,7 @@ module BioInf.GrammarProducts.Grammar where
 
 import Data.List.NonEmpty (NonEmpty)
 import Data.Set (Set)
+import qualified Data.Set as S
 import Control.Lens
 import Control.Lens.TH
 import Data.List (genericReplicate)
@@ -72,3 +73,10 @@ makeLenses ''Grammar
 makeLenses ''PR
 makeLenses ''NtT
 makeLenses ''NTSym
+
+-- | Returns the dimension of the grammar. Assumes that the constructed grammar
+-- is valid /and all dimensions are equal/. This is not checked.
+
+grammarDim :: Grammar -> Integer
+grammarDim (Grammar ps _) = S.findMin ps ^. lhs . to head . dim
+
