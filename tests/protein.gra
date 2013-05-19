@@ -1,27 +1,33 @@
 Grammar: DNA
 
-{-
-Need to declare all non-terminals and terminals. F{3} declares three
-non-terminals: F_0, F_1, F_2
--}
-
 NT: F{3}
 T:  c
+
+F{i} -> stay <<< F{i}   c c c
+F{i} -> orf1 <<< F{i+1} c c
+F{i} -> orf2 <<< F{i+2} c
+F{i} -> del  <<< F{i}
+
+//
+
+
+
+Grammar: DNAdone
+
+NT: F{3}
 T:  empty
 
-{-
-F{i} -> rhs
-expands to
-F_0 -> rhs (i=0)
-F_1 -> rhs (i=1)
-F_2 -> rhs (i=2)
--}
+F{i} -> nil <<< empty
 
-F{i} -> stay <<< c c c F{i}
-F{i} -> orf1 <<< c c   F{i+1}
-F{i} -> orf2 <<< c     F{i+2}
+//
 
-F{i} -> nil  <<< empty
+
+
+Grammar: DNAstand
+
+NT: F{3}
+
+F{i} -> del <<< F{i}
 
 //
 
@@ -31,11 +37,10 @@ Grammar: Protein
 
 NT: P
 T:  a
-T:  d
 T:  empty
 
-P -> amino <<< a P
-P -> del   <<< d P
+P -> amino <<< P a
+P -> del   <<< P
 P -> nil   <<< empty
 
 //
