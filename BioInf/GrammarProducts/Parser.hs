@@ -20,9 +20,9 @@ import Data.Either
 import Data.Map (Map)
 import Data.Set (Set)
 import Debug.Trace
+import Data.List
 import qualified Data.ByteString as B
 import qualified Data.HashSet as H
-import qualified Data.List.NonEmpty as N
 import qualified Data.Map as M
 import qualified Data.Set as S
 import Text.Parser.Expression
@@ -32,18 +32,24 @@ import Text.Printf
 import Text.Trifecta
 import Text.Trifecta.Delta
 import Text.Trifecta.Result
-import Data.Semigroup ((<>))
+import Data.Semigroup ((<>),times1p)
 import qualified Control.Newtype as T
+import Numeric.Natural.Internal
+import Prelude hiding (subtract)
 
 import BioInf.GrammarProducts.Grammar
 import BioInf.GrammarProducts.Op.Direct
+import BioInf.GrammarProducts.Op.Add
+import BioInf.GrammarProducts.Op.Subtract
+import BioInf.GrammarProducts.Op.Power
 
 
 
 data GS = GS
   { _ntsyms     :: Map String Integer
   , _tsyms      :: Set String
-  , _gs         :: Int
+  , _gs         :: Map String Grammar
+  , _gCount     :: Integer
   , _grammarUid :: Integer
   }
   deriving (Show)
@@ -53,6 +59,7 @@ instance Default GS where
     { _ntsyms     = def
     , _tsyms      = def
     , _gs         = def
+    , _gCount     = def
     , _grammarUid = def
     }
 
@@ -60,6 +67,7 @@ makeLenses ''GS
 
 -- | Parsing product expressions, producing a grammar, again
 
+{-
 expr :: Map String Grammar -> Parse Grammar
 expr g = choice [directprod] where
   directprod = do
@@ -68,53 +76,50 @@ expr g = choice [directprod] where
     gr <- choice gts
     return . unDirect $ Direct gl <> Direct gr
   gts = map gterm $ M.assocs g
+-}
 
-expr' :: Parse ExprGrammar
-expr' = e where
+expr :: Map String Grammar -> Parse ExprGrammar
+expr g = e where
   e = buildExpressionParser table term
-  table = [ [ binary "><" exprDirect AssocLeft ]
+  table = [ [ binary "^><" highDirect AssocLeft
+            ]
+          , [ binary "><"  exprDirect AssocLeft
+            , binary "*"   exprPower  AssocLeft
+            ]
+          , [ binary "+"   exprPlus   AssocLeft
+            , binary "-"   exprMinus  AssocLeft
+            ]
           ]
   term  =   parens e
-        <|> choice gts
-  gts = map gterm $ M.assocs g
+        <|> (choice gts <?> "previously defined grammar")
+        <|> (ExprNumber <$> natural <?> "integral power of grammar")
+  gts = map (fmap ExprGrammar . gterm) $ M.assocs g
   binary n f a = Infix (f <$ reserve gi n) a
-  exprDirect = 
+  exprDirect l r = ExprGrammar . unDirect $ (Direct $ getGrammar l) <> (Direct $ getGrammar r)
+  exprPlus   l r = ExprGrammar . unAdd $ (Add $ getGrammar l) <> (Add $ getGrammar r)
+  exprMinus  l r = ExprGrammar $ subtract (getGrammar l) (getGrammar r)
+  exprPower  l r = ExprGrammar $ power (getGrammar l) (getNumber r)
+  highDirect l r = ExprGrammar . unDirect $ times1p (Natural $ getNumber r -1) (Direct $ getGrammar l)
 
 data ExprGrammar
   = ExprGrammar { getGrammar :: Grammar }
-  | ExprNumber  Integer
-
-{-
-expr :: Map String Grammar -> Parse Grammar
-expr g = e where 
-  e = buildExpressionParser table term
-  table = [ [ binary "><" zzz AssocLeft ]
-          ]
-  term =   parens e
-       <|> choice gts
-       <|> (yyy <$> term <* reserve gi "^><" <*> natural)
-  gts = map gterm $ M.assocs g
-  binary n f a = Infix (f <$ reserve gi n) a
-  zzz :: Grammar -> Grammar -> Grammar
-  zzz = undefined
-  yyy :: Grammar -> Integer -> Grammar
-  yyy = undefined
--}
+  | ExprNumber  { getNumber  :: Integer }
 
 gterm :: (String,Grammar) -> Parse Grammar
-gterm (s,g) = do
-  reserve gi s
-  return g
+gterm (s,g) = g <$ reserve gi s
 
 -- | Grammar product
 
-gprod :: Map String Grammar -> Parse Grammar
-gprod g = do
+gprod :: Parse Grammar
+gprod = do
   reserve gi "Product:"
   n <- ident gi
-  e <- expr g
+  g <- use gs
+  e <- getGrammar <$> expr g
   reserve gi "//"
-  return $ e & gname .~ n
+  let g = e & gname .~ n
+  gs <>= M.singleton (g ^. gname) g
+  return g
 
 data Product = Product
   deriving (Show)
@@ -129,14 +134,16 @@ grammar = do
   ntsyms .= def
   tsyms  .= def
   -- new grammar
-  gs += 1
+  gCount += 1
   -- begin parsing
   reserve gi "Grammar:"
   n <- ident gi
   (nts,ts) <- partitionEithers <$> ntsts
   rs <- concat <$> some rule
   reserve gi "//"
-  return $ Grammar (S.fromList rs) n
+  let g = Grammar (S.fromList rs) n
+  gs <>= M.singleton (g ^. gname) g
+  return g
 
 -- | Parse a single rule. Some rules come attached with an index. In that case,
 -- each rule is inflated according to its modulus.
@@ -167,17 +174,17 @@ genPR ln i xs = go where
     return $ PR [l] r
   genL NoIdx = do
     g <- view grammarUid
-    return (Nt 1 [NTSym ln 1 0] g, (1,0))
+    return (Nt 1 [NTSym ln 1 0], (1,0))
   genL (WithVar v 0) = do
     g <- view grammarUid
     m <- views ntsyms (M.! ln)
     k <- lift [0 .. m-1]
-    return (Nt 1 [NTSym ln m k] g, (m,k))
+    return (Nt 1 [NTSym ln m k], (m,k))
   genL (Range xs) = do
     g <- view grammarUid
     m <- views ntsyms (M.! ln)
     k <- lift xs
-    return (Nt 1 [NTSym ln m k] g, (m,k))
+    return (Nt 1 [NTSym ln m k], (m,k))
   genR m k [] = do
     return []
   genR m k (Left (n,WithVar k' p) :rs) = do
@@ -186,23 +193,23 @@ genPR ln i xs = go where
     nm <- views ntsyms (M.! n)
     when (v/=k') $ error "oops, index var wrong"
     rs' <- genR m k rs
-    return (Nt 1 [NTSym n m ((k+p) `mod` m)] g :rs')
+    return (Nt 1 [NTSym n m ((k+p) `mod` m)] :rs')
   genR m k (Left (n,Range ls) :rs) = do
     g <- view grammarUid
     nm <- views ntsyms (M.! n)
     l <- lift ls
     rs' <- genR m k rs
-    return (Nt 1 [NTSym n m l] g :rs')
+    return (Nt 1 [NTSym n m l] :rs')
   genR m k (Left (n,NoIdx) :rs) = do
     g <- view grammarUid
     nm <- views ntsyms (M.! n)
     when (nm>1) $ error $ printf "oops, NoIdx given, but indexed NT in: %s" (show (nm,m,k,n,rs))
     rs' <- genR m k rs
-    return (Nt 1 [NTSym n 1 0] g :rs')
+    return (Nt 1 [NTSym n 1 0] :rs')
   genR m k (Right t :rs) = do
     g <- view grammarUid
     rs' <- genR m k rs
-    return (T 1 [TSym t] g :rs')
+    return (T 1 [TSym t] :rs')
 
 ruleNts :: ParseU (String,NtIndex)
 ruleNts = do
@@ -254,10 +261,15 @@ ts = do
   return [z]
 
 parseDesc = do
+  whiteSpace
+  {-
   gs <- some grammar
-  let g = M.fromList $ map ((^. gname) &&& id) gs
+  let g = undefined -- M.fromList $ map ((^. gname) &&& id) gs
   ps <- some (gprod g)
+  -}
+  gsps <- some (grammar <|> gprod)
   eof
+  let (gs,ps) = partition ((==1) . grammarDim) gsps
   return (gs,ps)
 
 gi = set styleReserved rs emptyIdents where

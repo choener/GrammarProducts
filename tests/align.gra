@@ -1,31 +1,23 @@
 
 Grammar: Align
-
 NT: X
 T:  a
-
-X -> X a | X
-
+X -> step  <<< X a
+X -> stand <<< X
 //
 
 Grammar: Add
-
 NT: X
 T:  empty
-
-X -> empty
-
+X -> nil <<< empty
 //
 
 Grammar: Sub
-
 NT: X
-
-X -> X
+X -> stand <<< X
+//
 
 Product: Two
-
 Align ^>< 2   +   Add ^>< 2   -   Sub ^>< 2
-
 //
 

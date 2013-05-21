@@ -29,11 +29,11 @@ newtype Direct a = Direct {unDirect :: a}
 instance Semigroup (Direct Grammar) where
   (Direct l) <> (Direct r) = Direct $ Grammar xs (l^.gname ++ "," ++ r^.gname) where
     xs = S.fromList [ direct pl pr | pl <- S.toList (l^.ps), pr <- S.toList (r^.ps) ]
-    direct (PR [Nt dl sl gl] ls) (PR [Nt dr sr gr] rs)
+    direct (PR [Nt dl sl] ls) (PR [Nt dr sr] rs)
       | (length $ filter isNt ls) > 1 || (length $ filter isNt rs) > 1
       = error "direct products are implemented only for linear grammars as of now"
       | otherwise
-      = PR [Nt (dl+dr) (sl++sr) (-1)] zs
+      = PR [Nt (dl+dr) (sl++sr)] zs
       where
         dls = map (^.dim) ls
         drs = map (^.dim) rs
@@ -49,24 +49,24 @@ mergeRHS ls' rs' = concat $ go (groupRHS ls') (groupRHS rs') where
   dr = head $ map (^.dim) rs'
   go [] [] = []
   go [] (r:rs)
-    | all isT  r = (map (\(T d ts _) -> T (dl+d) (genericReplicate dl (TSym "")++ts) 0) r) : go [] rs
-    | all isNt r = let [Nt d nts _] = r
-                   in  [Nt (dl+d) (genericReplicate dl epsilonNtSym ++ nts) 0] : go [] rs
+    | all isT  r = (map (\(T d ts) -> T (dl+d) (genericReplicate dl (TSym "")++ts)) r) : go [] rs
+    | all isNt r = let [Nt d nts] = r
+                   in  [Nt (dl+d) (genericReplicate dl epsilonNtSym ++ nts)] : go [] rs
   go (l:ls) []
-    | all isT  l = (map (\(T d ts _) -> T (d+dr) (ts++genericReplicate dr (TSym "")) 0) l) : go ls []
-    | all isNt l = let [Nt d nts _] = l
-                   in  [Nt (d+dr) (nts ++ genericReplicate dr epsilonNtSym) 0] : go ls []
+    | all isT  l = (map (\(T d ts) -> T (d+dr) (ts++genericReplicate dr (TSym ""))) l) : go ls []
+    | all isNt l = let [Nt d nts] = l
+                   in  [Nt (d+dr) (nts ++ genericReplicate dr epsilonNtSym)] : go ls []
   go (l:ls) (r:rs)
     | all isT  l && all isT  r = goT l r : go ls rs
     | all isNt l && all isNt r =
-        let [Nt dll nls _] = l
-            [Nt drr nrs _] = r
-        in  [Nt (dll+drr) (nls++nrs) 0] : go ls rs
+        let [Nt dll nls] = l
+            [Nt drr nrs] = r
+        in  [Nt (dll+drr) (nls++nrs)] : go ls rs
     | all isT l   = go [l] [] ++ go ls (r:rs)
     | all isT r   = go [] [r] ++ go (l:ls) rs
     | otherwise   = go [l] [] ++ go [] [r] ++ go ls rs
   goT [] [] = []
-  goT [] (T d ts _ :rs) = T (dl+d) (genericReplicate dl epsilonTSym ++ ts) 0 : goT [] rs
-  goT (T d ts _ :ls) [] = T (d+dr) (ts ++ genericReplicate dr epsilonTSym) 0 : goT ls []
-  goT (T dll tsl _ :ls) (T drr tsr _ :rs) = T (dll+drr) (tsl++tsr) 0 : goT ls rs
+  goT [] (T d ts :rs) = T (dl+d) (genericReplicate dl epsilonTSym ++ ts) : goT [] rs
+  goT (T d ts :ls) [] = T (d+dr) (ts ++ genericReplicate dr epsilonTSym) : goT ls []
+  goT (T dll tsl :ls) (T drr tsr :rs) = T (dll+drr) (tsl++tsr) : goT ls rs
 

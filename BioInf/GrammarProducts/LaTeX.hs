@@ -29,13 +29,13 @@ renderGrammar (Grammar ps gname) = subsubsection (raw $ pack gname) <> raw "\n" 
 renderNtT :: LaTeXC l => NtT -> l
 renderNtT = go
   where
-    go (Nt d ns _) = ll <> nstex ns <> rr
-    go (T  d ts _) = ll <> tstex ts <> rr
+    go (Nt d ns) = ll <> nstex ns <> rr
+    go (T  d ts) = ll <> tstex ts <> rr
     ll = raw "\\begingroup \\left ( \\begin{smallmatrix}"
     rr = raw "\\end{smallmatrix} \\right ) \\endgroup" where
     special x
-      | x == "empty" = epsilon
-      | null x       = raw $ pack "-"
+      | x == "empty" = varepsilon
+      | null x       = epsilon -- raw $ pack "-"
       | otherwise    = raw $ pack x
     tstex ts = mci [ special z | TSym z <- ts ]
     nstex ns = mci [ if m<=1 then special n

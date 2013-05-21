@@ -68,7 +68,8 @@ library
     newtype,
     HaTeX,
     text,
-    ansi-wl-pprint
+    ansi-wl-pprint,
+    nats
   exposed-modules:
     BioInf.GrammarProducts
     BioInf.GrammarProducts.Grammar

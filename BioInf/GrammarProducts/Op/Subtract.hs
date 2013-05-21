@@ -15,20 +15,13 @@ import BioInf.GrammarProducts.Helper
 
 
 
--- | Subtract two grammars. Implemented as the union of production rules without any
--- renaming.
-
-newtype Subtract a = Subtract {unSubtract :: a}
+-- | Subtract two grammars.
 
 
-
-instance Semigroup (Subtract Grammar) where
-  (Subtract l) <> (Subtract r)
-    | dl /= dr  = error $ printf "grammars %s and %s have different dimensions, cannot unify."
-    | otherwise = Subtract $ Grammar xs (l^.gname ++ "," ++ r^.gname)
+subtract :: Grammar -> Grammar -> Grammar
+subtract l r
+    | grammarDim l /= grammarDim r = error $ printf "grammars %s and %s have different dimensions, cannot unify." (show l) (show r)
+    | otherwise = Grammar xs (l^.gname ++ "," ++ r^.gname)
     where
-      dl = gD $ l^.ps
-      dr = gD $ r^.ps
-      gD = head . map (^.lhs.to head.dim) . S.toList
       xs = (l^.ps) S.\\ (r^.ps)
 

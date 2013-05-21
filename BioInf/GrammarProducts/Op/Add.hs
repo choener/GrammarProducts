@@ -24,11 +24,6 @@ newtype Add a = Add {unAdd :: a}
 
 instance Semigroup (Add Grammar) where
   (Add l) <> (Add r)
-    | dl /= dr  = error $ printf "grammars %s and %s have different dimensions, cannot unify."
-    | otherwise = Add $ Grammar xs (l^.gname ++ "," ++ r^.gname)
-    where
-      dl = gD $ l^.ps
-      dr = gD $ r^.ps
-      gD = head . map (^.lhs.to head.dim) . S.toList
-      xs = S.union (l^.ps) (r^.ps)
+    | grammarDim l /= grammarDim r = error $ printf "ERROR: grammars \n%s\n and \n%s\n have different dimensions, cannot unify." (show l) (show r)
+    | otherwise = Add $ Grammar (S.union (l^.ps) (r^.ps)) (l^.gname ++ "," ++ r^.gname)
 

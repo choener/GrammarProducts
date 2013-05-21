@@ -25,12 +25,12 @@ data NtT
   = Nt
     { _dim  :: Integer
     , _symN :: [NTSym]
-    , _guid :: Integer
+--    , _guid :: Integer
     }
   | T
     { _dim  :: Integer
     , _symT :: [TSym]
-    , _guid :: Integer
+--    , _guid :: Integer
     }
   deriving (Show,Eq,Ord)
 
@@ -39,18 +39,18 @@ epsilonNtSym = NTSym "" 0 0
 epsilonTSym  = TSym ""
 
 epsilonNt :: Integer -> NtT
-epsilonNt d = Nt d (genericReplicate d (NTSym "" 0 0)) 0
+epsilonNt d = Nt d (genericReplicate d (NTSym "" 0 0))
 
 epsilonT :: Integer -> NtT
-epsilonT d = T d (genericReplicate d (TSym "")) 0
+epsilonT d = T d (genericReplicate d (TSym ""))
 
 isEpsilonNtSym = (==epsilonNtSym)
 
 isEpsilonTSym  = (==epsilonTSym)
 
 isEpsilon :: NtT -> Bool
-isEpsilon (Nt d zs 0) = all isEpsilonNtSym zs
-isEpsilon (T  d zs 0) = all isEpsilonTSym  zs
+isEpsilon (Nt d zs) = all isEpsilonNtSym zs
+isEpsilon (T  d zs) = all isEpsilonTSym  zs
 
 isNt (Nt{}) = True
 isNt _      = False
@@ -78,5 +78,7 @@ makeLenses ''NTSym
 -- is valid /and all dimensions are equal/. This is not checked.
 
 grammarDim :: Grammar -> Integer
-grammarDim (Grammar ps _) = S.findMin ps ^. lhs . to head . dim
+grammarDim g@(Grammar ps _)
+  | S.null ps = error $ "grammar empty:" ++ show g
+  | otherwise = S.findMin ps ^. lhs . to head . dim
 
