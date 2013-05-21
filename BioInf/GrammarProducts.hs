@@ -13,7 +13,7 @@ import BioInf.GrammarProducts.Grammar
 import BioInf.GrammarProducts.LaTeX
 import BioInf.GrammarProducts.Op.Add
 import BioInf.GrammarProducts.Op.Direct
-import BioInf.GrammarProducts.Op.Scale
+import BioInf.GrammarProducts.Op.Power
 import BioInf.GrammarProducts.Op.Subtract
 import BioInf.GrammarProducts.Parser
 

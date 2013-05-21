@@ -69,6 +69,21 @@ expr g = choice [directprod] where
     return . unDirect $ Direct gl <> Direct gr
   gts = map gterm $ M.assocs g
 
+expr' :: Parse ExprGrammar
+expr' = e where
+  e = buildExpressionParser table term
+  table = [ [ binary "><" exprDirect AssocLeft ]
+          ]
+  term  =   parens e
+        <|> choice gts
+  gts = map gterm $ M.assocs g
+  binary n f a = Infix (f <$ reserve gi n) a
+  exprDirect = 
+
+data ExprGrammar
+  = ExprGrammar { getGrammar :: Grammar }
+  | ExprNumber  Integer
+
 {-
 expr :: Map String Grammar -> Parse Grammar
 expr g = e where 
