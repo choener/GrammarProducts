@@ -42,7 +42,7 @@ main = do
     Failure e -> liftIO $ displayIO stdout $ renderPretty 0.8 80 $ e <> linebreak
     Success (gs,ps) -> case o of
       Latex{..} -> do
-        let latex g = Latex.renderFile (printf "%s/%s.tex" outdir (g^.gname)) . renderGrammarLaTeX $ g
+        let latex g = Latex.renderFile (printf "%s/%s.tex" outdir (g^.gname)) . renderGrammarLaTeX columns $ g
         when withatoms $ mapM_ latex gs
         mapM_ latex ps
       Haskell{..} -> do
@@ -53,6 +53,7 @@ data Options
     { infile    :: String
     , outdir    :: String
     , withatoms :: Bool
+    , columns   :: Int
     }
   | Haskell
     { infile    :: String
@@ -65,6 +66,7 @@ optionLatex = Latex
   { infile    = ""    &= help "grammar file to read (stdin if not given)"
   , outdir    = "."   &= help "directory to put grammars in (./ if not given)"
   , withatoms = False &= help "if set, source grammars (atoms) are written to target, too"
+  , columns   = 1     &= help "align grammar to 1 or 2 columns?"
   }
 
 optionHaskell = Haskell

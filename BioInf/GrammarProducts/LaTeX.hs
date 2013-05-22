@@ -1,3 +1,4 @@
+{-# LANGUAGE ParallelListComp #-}
 {-# LANGUAGE NoMonomorphismRestriction #-}
 {-# LANGUAGE OverloadedStrings #-}
 
@@ -15,14 +16,17 @@ import BioInf.GrammarProducts.Grammar
 
 
 
-renderGrammarLaTeX :: Grammar -> LaTeX
+renderGrammarLaTeX :: Int -> Grammar -> LaTeX
 renderGrammarLaTeX = renderGrammar
 
 -- | Transform a grammar to some LaTeX code.
 
-renderGrammar :: LaTeXC l => Grammar -> l
-renderGrammar (Grammar ps gname) = subsubsection (raw $ pack gname) <> raw "\n" <> align xs <> raw "\n" where
-  xs = [ (renderNtT l, mconcat (map renderNtT r)) | PR [l] r <- toList ps ]
+renderGrammar :: LaTeXC l => Int -> Grammar -> l
+renderGrammar k (Grammar ps gname)
+  | k == 1 = align xs
+  | k == 2 = align2 xs
+  where -- subsubsection (raw $ pack gname) <> raw "\n" <> align2 xs <> raw "\n" where
+    xs = [ (renderNtT l, mconcat (map renderNtT r)) | PR [l] r <- toList ps ]
 
 -- | Transform a single terminal or non-terminal.
 
@@ -46,5 +50,14 @@ renderNtT = go
 mci = mconcat . intersperse (raw "\\\\\n")
 
 align :: LaTeXC l => [(l,l)] -> l
-align = (liftL $ TeXEnv "align" []) . go where
+align = (liftL $ TeXEnv "align*" []) . go where
   go xs = mci [ l & to <> r | (l,r) <- xs ]
+
+align2 :: LaTeXC l => [(l,l)] -> l
+align2 = (liftL $ TeXEnv "align*" []) . go where
+  go xs = let len     = length xs
+              (as,bs) = splitAt ((len +1) `div` 2) $ xs ++ repeat ("","")
+              to' c = if c > len `div` 2 then "" else to
+          in
+              mci [ ll & to <> lr & rl & to' c <> rr | (ll,lr) <- as | ((rl,rr),c) <- zip bs [1..] ]
+
