@@ -11,12 +11,20 @@ import Text.Trifecta (parseFromFile)
 
 import BioInf.GrammarProducts.Grammar
 import BioInf.GrammarProducts.LaTeX
+import BioInf.GrammarProducts.Haskell
 import BioInf.GrammarProducts.Op.Add
 import BioInf.GrammarProducts.Op.Direct
 import BioInf.GrammarProducts.Op.Power
 import BioInf.GrammarProducts.Op.Subtract
 import BioInf.GrammarProducts.Parser
 
+testHS :: IO ()
+testHS = do
+  pff <- parseFromFile (runGrammarLang $ flip evalStateT def $ parseDesc) "./tests/protein.gra"
+  case pff of
+    Nothing -> return ()
+    Just (gs,ps) -> do
+      mapM_ (putStrLn . hsGrammar) ps
 {-
 test :: IO ()
 test = do

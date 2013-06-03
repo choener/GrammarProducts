@@ -18,7 +18,7 @@ data NTSym = NTSym
   }
   deriving (Show,Eq,Ord)
 
-newtype TSym  = TSym  String
+newtype TSym  = TSym { _tname :: String }
   deriving (Show,Eq,Ord)
 
 data NtT
@@ -73,6 +73,7 @@ makeLenses ''Grammar
 makeLenses ''PR
 makeLenses ''NtT
 makeLenses ''NTSym
+makeLenses ''TSym
 
 -- | Returns the dimension of the grammar. Assumes that the constructed grammar
 -- is valid /and all dimensions are equal/. This is not checked.

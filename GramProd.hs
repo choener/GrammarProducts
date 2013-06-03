@@ -27,6 +27,7 @@ import Text.Trifecta.Delta
 
 import BioInf.GrammarProducts.Grammar
 import BioInf.GrammarProducts.LaTeX
+import BioInf.GrammarProducts.Haskell
 import BioInf.GrammarProducts.Parser
 
 
@@ -46,7 +47,9 @@ main = do
         when withatoms $ mapM_ latex gs
         mapM_ latex ps
       Haskell{..} -> do
-        error "might wanna implement me"
+        let s = renderGrammarHaskell (if withatoms then gs else [] ++ ps)
+        -- writeFile (printf "%s/%s.hs" outdir (g^.gname)) s
+        putStrLn s
 
 data Options
   = Latex
