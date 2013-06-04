@@ -24,7 +24,7 @@ testHS = do
   case pff of
     Nothing -> return ()
     Just (gs,ps) -> do
-      mapM_ (putStrLn . hsGrammar) ps
+      mapM_ (putStrLn . rgh) ps
 {-
 test :: IO ()
 test = do

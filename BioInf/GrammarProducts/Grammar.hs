@@ -60,6 +60,7 @@ isT = not . isNt
 data PR = PR
   { _lhs :: [NtT]
   , _rhs :: [NtT]
+  , _fun :: [String]
   }
   deriving (Show,Eq,Ord)
 

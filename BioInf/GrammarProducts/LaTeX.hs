@@ -26,7 +26,7 @@ renderGrammar k (Grammar ps gname)
   | k == 1 = align xs
   | k == 2 = align2 xs
   where -- subsubsection (raw $ pack gname) <> raw "\n" <> align2 xs <> raw "\n" where
-    xs = [ (renderNtT l, mconcat (map renderNtT r)) | PR [l] r <- toList ps ]
+    xs = [ (renderNtT l, mconcat (map renderNtT r)) | PR [l] r _ <- toList ps ]
 
 -- | Transform a single terminal or non-terminal.
 

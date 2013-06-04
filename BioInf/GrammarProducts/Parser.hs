@@ -161,17 +161,17 @@ rule = do
   zs <- runUnlined $ some (Left <$> try ruleNts <|> Right <$> try ruleTs)
   whiteSpace
   s <- get
-  let ret = runReaderT (genPR ln i zs) s
+  let ret = runReaderT (genPR fun ln i zs) s
   return ret
 
 -- | Generate one or more production rules from a parsed line.
 
-genPR :: String -> NtIndex -> [Either (String,NtIndex) String] -> ReaderT GS [] PR
-genPR ln i xs = go where
+genPR :: String -> String -> NtIndex -> [Either (String,NtIndex) String] -> ReaderT GS [] PR
+genPR f ln i xs = go where
   go = do
     (l,(m,k)) <- genL i
     r <- genR m k xs
-    return $ PR [l] r
+    return $ PR [l] r [f]
   genL NoIdx = do
     g <- view grammarUid
     return (Nt 1 [NTSym ln 1 0], (1,0))

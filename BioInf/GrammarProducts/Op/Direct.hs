@@ -7,6 +7,7 @@ import Data.Semigroup
 import Control.Lens
 import qualified Data.Set as S
 import Data.List (genericReplicate)
+import Data.Monoid hiding ((<>))
 
 import BioInf.GrammarProducts.Grammar
 import BioInf.GrammarProducts.Helper
@@ -29,21 +30,31 @@ newtype Direct a = Direct {unDirect :: a}
 instance Semigroup (Direct Grammar) where
   (Direct l) <> (Direct r) = Direct $ Grammar xs (l^.gname ++ "," ++ r^.gname) where
     xs = S.fromList [ direct pl pr | pl <- S.toList (l^.ps), pr <- S.toList (r^.ps) ]
-    direct (PR [Nt dl sl] ls) (PR [Nt dr sr] rs)
+    direct (PR [Nt dl sl] ls fl) (PR [Nt dr sr] rs fr)
       | (length $ filter isNt ls) > 1 || (length $ filter isNt rs) > 1
       = error "direct products are implemented only for linear grammars as of now"
       | otherwise
-      = PR [Nt (dl+dr) (sl++sr)] zs
+      = PR [Nt (dl+dr) (sl++sr)] zs (fl ++ fr)
       where
         dls = map (^.dim) ls
         drs = map (^.dim) rs
         zs  = mergeRHS ls rs
+
+-- TODO check that 'mempty' does not explode somewhere ;-) == the neutral
+-- element is weird in code, too
+
+instance Monoid (Direct Grammar) where
+  mempty = Direct $ Grammar r "" where
+    r = S.singleton $ PR [] [] []
+  mappend = (<>)
 
 -- | Merges right-hand sides in a direct product. Currently only defined for
 -- linear grammars (and certain types of CFGs). Basically, two or more
 -- non-terminals next to each other will fail.
 
 mergeRHS :: [NtT] -> [NtT] -> [NtT]
+mergeRHS [] rs = rs -- neutral element
+mergeRHS ls [] = ls -- neutral element
 mergeRHS ls' rs' = concat $ go (groupRHS ls') (groupRHS rs') where
   dl = head $ map (^.dim) ls'
   dr = head $ map (^.dim) rs'
