@@ -20,7 +20,7 @@ import BioInf.GrammarProducts.Grammar
 
 
 renderGrammarHaskell :: [Grammar] -> String
-renderGrammarHaskell gs = concatMap show gs
+renderGrammarHaskell = concat . intersperse "\n\n" . map rgh
 
 -- render single grammar
 
@@ -90,4 +90,4 @@ mkFunName = concat . intersperse "_"
 
 -- render algebra product
 
-doctorsNote = "TODO you now need to define the module name, the imports, as well as algebras and table-filling"
+doctorsNote = "\n-- TODO you now need to define the module name, the imports, as well as algebras and table-filling"

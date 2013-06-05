@@ -33,9 +33,9 @@ description:
                 .
                 Hoener zu Siederdissen, Hofacker, Stadler,
                 .
-                NO TITLE YET,
+                How to Multiply Dynamic Programming Algorithms
                 .
-                in preparation, 2013
+                submitted, 2013
 
 
 
@@ -73,6 +73,7 @@ library
   exposed-modules:
     BioInf.GrammarProducts
     BioInf.GrammarProducts.Grammar
+    BioInf.GrammarProducts.Haskell
     BioInf.GrammarProducts.Helper
     BioInf.GrammarProducts.LaTeX
     BioInf.GrammarProducts.Op.Add
@@ -80,6 +81,7 @@ library
     BioInf.GrammarProducts.Op.Power
     BioInf.GrammarProducts.Op.Subtract
     BioInf.GrammarProducts.Parser
+    BioInf.GrammarProducts.Tools
   ghc-options:
 
 executable GramProd
