@@ -27,7 +27,7 @@ Produce four-way alignments, but remove the case where we map the non-terminal
 directly onto itself.
 -}
 
-Product: Fourwary
+Product: Fourway
 
 Word ^>< 4   -   Del ^>< 4
 

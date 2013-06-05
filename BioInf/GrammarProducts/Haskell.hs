@@ -25,7 +25,7 @@ renderGrammarHaskell = concat . intersperse "\n\n" . map rgh
 -- render single grammar
 
 rgh :: Grammar -> String
-rgh g = concat $ intersperse "\n\n" [doctorsNote, hsGrammar g, renderSignature g]
+rgh g = concat $ intersperse "\n\n" [renderSignature g, hsGrammar g]
 
 -- Render just the rules as a multi-dim Haskell grammar. Individual memo-tables
 -- and their fill functions are placed into an inductive tuple. The
@@ -37,16 +37,16 @@ rgh g = concat $ intersperse "\n\n" [doctorsNote, hsGrammar g, renderSignature g
 
 hsGrammar :: Grammar -> String
 hsGrammar g = hdr ++ (concat $ inlined 2 $ [ "(Z:.\n" ] ++ intersperse i ts ++ [")" ]) ++ inl where
-  hdr = printf "g%s S%s{..} {-non-terminals:-} %s {-terminals:-} %s\n" (g^.gname) (g^.gname) nbs tbs
+  hdr = printf "g%s s%s {-non-terminals:-} %s {-terminals:-} %s =\n" (g^.gname) (g^.gname) nbs tbs
   nbs = concat . intersperse " " . nub
       . concatMap (map mkNtSym . (^.lhs)) . toList $ g^.ps -- non-terminal binders
   tbs = concat . intersperse " " . filter (not . null)
       . nub . map (^.tname) . concatMap (^.symT) . filter isT
       . concatMap (^.rhs) . toList $ g^.ps -- terminal binders
   i = ":."
-  ts = map mkProdRule xs
+  ts = map (mkProdRule (printf "s%s" (g^.gname))) xs
   xs = groupBy ((==) `on` (^.lhs)) . toList $ g^.ps
-  inl = printf "\n{-# INLINE %s #-}\n" (g^.gname)
+  inl = printf "\n{-# INLINE g%s #-}\n" (g^.gname)
 
 mkNtSym :: NtT -> String
 mkNtSym t@T{..} = error $ "dying at finding terminal symbol in mkNtSym: " ++ show t
@@ -54,21 +54,21 @@ mkNtSym (Nt _ ns) = concatMap f ns
   where f (NTSym n 1 _) = printf "%s" (lowerHead n)
         f (NTSym n _ i) = printf "%s%d" (lowerHead n) i
 
-mkProdRule :: [PR] -> String
-mkProdRule ps@(p:_)
+mkProdRule :: String -> [PR] -> String
+mkProdRule c ps@(p:_)
   | any (l/=) ls = error $ "found malformed production rule:" ++ show (p,ps)
-  | otherwise    = "( " ++ concatMap mkNtSym l ++ " , " ++ mkRHS rs ++ " )\n"
+  | otherwise    = "( " ++ concatMap mkNtSym l ++ " , " ++ mkRHS c rs ++ " )\n"
   where ls = map (^.lhs) ps
         rs = ps
         l = p^.lhs
 
-mkRHS :: [PR] -> String
-mkRHS ps = (concat $ intersperse " ||| " $ map mkRule ps) ++ " ... h"
+mkRHS :: String -> [PR] -> String
+mkRHS c ps = (concat $ intersperse " ||| " $ map (mkRule c) ps) ++ " ... h " ++ c
 
-mkRule :: PR -> String
-mkRule p = mkFunName (p^.fun) ++ " <<< " ++ (concat $ intersperse " % " $ map mkNtT $ p^.rhs)
+mkRule :: String -> PR -> String
+mkRule c p = mkFunName (p^.fun) ++ " " ++ c ++ " <<< " ++ (concat $ intersperse " % " $ map mkNtT $ p^.rhs)
 
-mkNtT t@T{..} = "T:!" ++ (concat $ intersperse ":!" $ map mkSingleTSym (t^.symT))
+mkNtT t@T{..} = "(T:!" ++ (concat $ intersperse ":!" $ map mkSingleTSym (t^.symT)) ++ ")"
 mkNtT nt = mkNtSym nt
 
 mkSingleTSym (TSym n)
@@ -83,10 +83,22 @@ inlined k xs = map (replicate k ' ' ++) xs
 -- render the signature
 
 renderSignature :: Grammar -> String
-renderSignature g = printf "data S%s = S%s\n  { " (g^.gname) (g^.gname) ++ (concat $ intersperse "\n  , " xs) ++ "\n  }" where
-  xs = map mkFunName . map (^.fun) . toList $ g^.ps
+renderSignature g = printf "data S%s _m _x _r %s = S%s\n  { "
+                            (g^.gname) ts (g^.gname) ++ (concat $ intersperse "\n  , " xs) ++ "\n  }"
+  where
+    xs = (map mkFunType . toList $ g^.ps) ++ ["h :: Stream _m _x -> _m _r"]
+    ts = concat . intersperse " " . nub 
+       . filter (not . null) . map (^.tname)
+       . concatMap (^.symT) . filter isT
+       . concatMap (^.rhs) . toList $ g^.ps
 
 mkFunName = concat . intersperse "_"
+
+mkFunType p = (concat . intersperse "_" $ p^.fun) ++ " :: " ++ as where
+  as = (concat $ intersperse " -> " $ map trans $ p^.rhs) ++ " -> _x"
+--  trans t@T{..} = "(Z:." ++ (concat $ intersperse ":." $ map mkSingleTSym (t^.symT)) ++ ")"
+  trans t@T{..} = foldl' (\s n -> concat ["(",s,":.",n,")"]) "Z" $ map mkSingleTSym (t^.symT)
+  trans nt = "_x" -- mkNtSym nt
 
 -- render algebra product
 

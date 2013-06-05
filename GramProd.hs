@@ -60,7 +60,7 @@ data Options
     }
   | Haskell
     { infile    :: String
-    , outdir    :: String
+--    , outdir    :: String
     , withatoms :: Bool
     }
   deriving (Show,Data,Typeable)
