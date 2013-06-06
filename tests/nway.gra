@@ -16,11 +16,9 @@ W -> loop <<< W
 Product: TwoWay
 Step >< Step + Done * 2 - Loop * 2
 //
-{-
 Product: ThreeWay
 Step >< Step >< Step + Done * 3 - Loop * 3
 //
 Product: FourWay
 Step >< Step >< Step >< Step + Done * 4 - Loop * 4
 //
--}

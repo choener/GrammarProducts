@@ -18,7 +18,7 @@ import BioInf.GrammarProducts.Helper
 
 power :: Grammar -> Integer -> Grammar
 power gr k = Grammar (S.map f $ gr^.ps) (gr^.gname ++ "," ++ show k) where
-  f (PR l r f) = PR (map g l) (map g r) (f ++ f)
+  f (PR l r f) = PR (map g l) (map g r) (concat $ genericReplicate k f)
   g (Nt d s) = Nt (d*k) (concat $ genericReplicate k s)
   g (T  d s) = T  (d*k) (concat $ genericReplicate k s)
 

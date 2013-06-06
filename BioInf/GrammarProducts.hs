@@ -20,7 +20,7 @@ import BioInf.GrammarProducts.Parser
 
 testHS :: IO ()
 testHS = do
-  pff <- parseFromFile (runGrammarLang $ flip evalStateT def $ parseDesc) "./tests/protein.gra"
+  pff <- parseFromFile (runGrammarLang $ flip evalStateT def $ parseDesc) "./tests/nway.gra"
   case pff of
     Nothing -> return ()
     Just (gs,ps) -> do

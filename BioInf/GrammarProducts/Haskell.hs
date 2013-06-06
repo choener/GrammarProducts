@@ -40,13 +40,17 @@ hsGrammar g = hdr ++ (concat $ inlined 2 $ [ "(Z:.\n" ] ++ intersperse i ts ++ [
   hdr = printf "g%s s%s {-non-terminals:-} %s {-terminals:-} %s =\n" (g^.gname) (g^.gname) nbs tbs
   nbs = concat . intersperse " " . nub
       . concatMap (map mkNtSym . (^.lhs)) . toList $ g^.ps -- non-terminal binders
-  tbs = concat . intersperse " " . filter (not . null)
-      . nub . map (^.tname) . concatMap (^.symT) . filter isT
+  tbs = concat . intersperse " "
+      . nub . concatMap mkTSym . filter isT
       . concatMap (^.rhs) . toList $ g^.ps -- terminal binders
   i = ":."
   ts = map (mkProdRule (printf "s%s" (g^.gname))) xs
   xs = groupBy ((==) `on` (^.lhs)) . toList $ g^.ps
   inl = printf "\n{-# INLINE g%s #-}\n" (g^.gname)
+
+mkTSym :: NtT -> [String]
+mkTSym nt@Nt{..} = error $ "dying at finding non-terminal symbol in mkTSym: " ++ show nt
+mkTSym (T _ ts)  = zipWith (\(TSym t) n -> printf "%s_%d" t n) (filter (not . null . (^.tname)) ts) [1 :: Int ..]
 
 mkNtSym :: NtT -> String
 mkNtSym t@T{..} = error $ "dying at finding terminal symbol in mkNtSym: " ++ show t
@@ -68,11 +72,15 @@ mkRHS c ps = (concat $ intersperse " ||| " $ map (mkRule c) ps) ++ " ... h " ++ 
 mkRule :: String -> PR -> String
 mkRule c p = mkFunName (p^.fun) ++ " " ++ c ++ " <<< " ++ (concat $ intersperse " % " $ map mkNtT $ p^.rhs)
 
-mkNtT t@T{..} = "(T:!" ++ (concat $ intersperse ":!" $ map mkSingleTSym (t^.symT)) ++ ")"
+mkNtT t@T{..} = "(T:!" ++ (concat $ intersperse ":!" $ zipWith mkSingleTSym' [1::Int ..] (t^.symT)) ++ ")"
 mkNtT nt = mkNtSym nt
 
+mkSingleTSym' d (TSym t)
+  | null t = "None"
+  | otherwise = printf "%s_%d" t d
+
 mkSingleTSym (TSym n)
-  | null n = "None"
+  | null n = "()"
   | otherwise = n
 
 lowerHead [] = []
