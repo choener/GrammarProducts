@@ -7,7 +7,7 @@ module BioInf.GrammarProducts.LaTeX where
 import Text.LaTeX.Base
 import Text.LaTeX.Base.Syntax
 import Text.LaTeX.Base.Class
-import Text.LaTeX.Packages.AMSMath
+import Text.LaTeX.Packages.AMSMath hiding (align)
 import Data.Text (pack)
 import Data.Set (toList)
 import Data.List (intersperse)
