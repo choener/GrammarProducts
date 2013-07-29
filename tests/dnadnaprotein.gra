@@ -1,0 +1,43 @@
+Grammar: DNA
+NT: F{3}
+T:  c
+F{i} -> stay <<< F{i}   c c c
+F{i} ->  rf1 <<< F{i+1} c c
+F{i} ->  rf2 <<< F{i+2} c
+F{i} -> del  <<< F{i}
+//
+
+Grammar: DNAdone
+NT: F{3}
+T:  empty
+F{i} -> nil <<< empty
+//
+
+Grammar: DNAstand
+NT: F{3}
+F{i} -> del <<< F{i}
+//
+
+Grammar: PRO
+NT: P
+T:  a
+T:  empty
+P -> amino <<< P a
+P -> del   <<< P
+//
+
+Grammar: PROdone
+NT: P
+T:  empty
+P -> nil <<< empty
+//
+
+Grammar: PROstand
+NT: P
+P -> del <<< P
+//
+
+Product: DnaDnaPro
+DNA >< DNA >< PRO   +   DNAdone >< DNAdone >< PROdone   -   DNAstand >< DNAstand >< PROstand
+//
+
