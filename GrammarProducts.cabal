@@ -1,5 +1,5 @@
 name:           GrammarProducts
-version:        0.0.0.1
+version:        0.0.0.2
 author:         Christian Hoener zu Siederdissen, 2013
 copyright:      Christian Hoener zu Siederdissen, Ivo L. Hofacker, Peter F. Stadler, 2013
 homepage:       http://www.tbi.univie.ac.at/~choener/
@@ -31,11 +31,13 @@ description:
                 Formal background can be found in:
                 .
                 .
-                Hoener zu Siederdissen, Hofacker, Stadler,
+                Christian Höner zu Siederdissen, Ivo L. Hofacker, and Peter F. Stadler
                 .
                 How to Multiply Dynamic Programming Algorithms
                 .
-                submitted, 2013
+                Brazilian Symposium on Bioinformatics (BSB 2013)
+                .
+                Lecture Notes in Bioinformatics 8213, Springer, Heidelberg
 
 
 
@@ -46,35 +48,35 @@ Extra-Source-Files:
 library
   build-depends:
     base >= 4 && < 5,
-    template-haskell          ,
-    primitive      >= 0.5     ,
-    vector         >= 0.10    ,
-    PrimitiveArray >= 0.5.1.0 ,
+--    algebra,
+--    ansi-wl-pprint ,
+--    ansi-wl-pprint,
+--    bytestring ,
+--    containers ,
+--    data-default,
+--    ghc-prim ,
+--    haskell-src ,
+--    haskell-src-exts,
+--    haskell-src-meta,
+--    HaTeX,
+--    lens ,
+--    nats,
+--    newtype,
+--    parsers,
+--    primitive      >= 0.5     ,
+--    repa,
+--    semigroups ,
+--    template-haskell          ,
+--    text,
+--    th-build,
+--    transformers,
+--    trifecta ,
+--    tuple-th,
+--    unordered-containers,
+--    vector         >= 0.10
     ADPfusion      >= 0.2.0   ,
     FormalGrammars >= 0.0.0.1 ,
-    trifecta ,
-    semigroups ,
-    containers ,
-    lens ,
-    ansi-wl-pprint ,
-    ghc-prim ,
-    bytestring ,
-    repa,
-    tuple-th,
-    algebra,
-    transformers,
-    parsers,
-    unordered-containers,
-    data-default,
-    newtype,
-    HaTeX,
-    text,
-    ansi-wl-pprint,
-    nats,
-    th-build,
-    haskell-src-meta,
-    haskell-src-exts,
-    haskell-src
+    PrimitiveArray >= 0.5.1.0
   exposed-modules:
     FormalLanguage.GrammarProduct
     FormalLanguage.GrammarProduct.Op.Greibach
