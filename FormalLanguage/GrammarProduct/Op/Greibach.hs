@@ -4,7 +4,7 @@ module FormalLanguage.GrammarProduct.Op.Greibach where
 
 import Control.Lens
 import Control.Lens.Fold
-import Control.Newtype
+import Control.Newtype ()
 import Data.List (genericReplicate)
 import Data.Monoid hiding ((<>))
 import Data.Semigroup
@@ -12,6 +12,7 @@ import qualified Data.Set as S
 import Text.Printf
 import Data.List (groupBy)
 import Data.Function (on)
+import Data.Maybe
 
 import FormalLanguage.Grammar
 
@@ -32,32 +33,38 @@ instance Semigroup TwoGNF where
   (TwoGNF g) <> (TwoGNF h) = TwoGNF $ Grammar ts ns rs s where
     ts = undefined
     ns = undefined
-    rs = S.fromList . concat $ [ l <.> r | l <- S.toList (g^.rules), r <- S.toList (h^.rules) ]
+    rs = S.fromList
+       . map starRemove
+       . catMaybes
+       $ [ l <.> r
+         | l <- concatMap (starExtend $ gDim g) . S.toList $ g^.rules
+         , r <- concatMap (starExtend $ gDim h) . S.toList $ h^.rules
+         ]
     s  = Symb $ g^.start.symb ++ h^.start.symb
-    (<.>) :: Rule -> Rule -> [Rule]
-    a <.> b | (a^.lhs==g^.start) `exactlyOne` (b^.lhs==h^.start) = []
-    (Rule al af ars) <.> (Rule bl bf brs) = map (Rule (Symb $ al^.symb ++ bl^.symb) undefined) (aligned ars brs)
-    {-
-    -- X -> a <.> X -> a
-    go2gnf [a] [b] = [[Symb $ a^.symb ++ b^.symb]]
-    -- X -> a <.> X -> aY
-    go2gnf [a] [b1,b2]    = [[Symb $ a^.symb ++ b1^.symb], [Symb $ undefined ++ b2^.symb]] -- TODO epsilon of size b1
-    -- X -> a <.> X -> aYZ
-    go2gnf [a] [b1,b2,b3] = [[Symb $ a^.symb ++ b1^.symb], [Symb $ undefined ++ b2^.symb], [Symb $ undefined ++ b3^.symb]]
-    -- X -> aY <.> X -> a
-    go2gnf [a1,a2] [b1] = [[Symb $ a1^.symb ++ b1^.symb], [Symb $ a2^.symb ++ undefined]]
-    -- X -> aY <.> X -> aY
-    go2gnf [a1,a2] [b1,b2] = [[Symb $ a1^.symb ++ b1^.symb], [Symb $ a2^.symb ++ b2^.symb]]
-    -- X -> aY <.> X -> aYZ
-    go2gnf [a1,a2] [b1,b2,b3]
-    -- X -> aYZ <.> X -> a
-    -- X -> aYZ <.> X -> aY
-    -- X -> aYZ <.> X -> aYZ
-    go2gnf ars brs = error $ "cannot handle: " ++ show (ars,brs)
-    -}
+    (<.>) :: Rule -> Rule -> Maybe Rule
+    a <.> b | (a^.lhs==g^.start) `exactlyOne` (b^.lhs==h^.start) = Nothing
+    a <.> b = Just
+            $ Rule (Symb $ a^.lhs.symb ++ b^.lhs.symb)
+                   undefined
+                   (zipWith (\x y -> Symb $ x^.symb ++ y^.symb) (a^.rhs) (b^.rhs))
     exactlyOne False True  = True
     exactlyOne True  False = True
     exactlyOne _     _     = False
+    -- | Extend a rule with ``epsilon-type'' productions to create 2-GNF for all rules
+    starExtend :: Int -> Rule -> [Rule]
+    starExtend k (Rule l f [t])   = [ Rule l f [t,stars k, stars k]]
+    starExtend k (Rule l f [t,n]) = [ Rule l f [t,n,stars k]
+                                    , Rule l f [t,stars k,n]
+                                    ]
+    -- assuming that we have a 2-gnf at most
+    starExtend k r                = [r]
+    stars :: Int -> Symb
+    stars k = Symb . replicate k $ T ""
+    -- | Remove star-online columns.
+    starRemove :: Rule -> Rule
+    starRemove = over rhs (filter (any (not . isEpsilon) . getSymbs))
+    isEpsilon (T "") = True
+    isEpsilon _      = False
 
 instance Monoid TwoGNF where
   mempty = TwoGNF $ Grammar S.empty S.empty (S.singleton undefined) (Symb [])
