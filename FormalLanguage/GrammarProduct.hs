@@ -10,6 +10,10 @@ module FormalLanguage.GrammarProduct
   ( (><)
   ) where
 
+import Data.Monoid
+
+import FormalLanguage.Grammar
+
 import FormalLanguage.GrammarProduct.Op.Greibach as Greibach
 import FormalLanguage.GrammarProduct.Op.Chomsky  as Chomsky
 import FormalLanguage.GrammarProduct.Op.LinearDirect as Linear
@@ -44,5 +48,5 @@ g >< h
 -- forms a monoid under the 'Add' newtype.
 
 (.+) :: Grammar -> Grammar -> Grammar
-g .+ h = runAdd $ Add g <> Agg h
+g .+ h = runAdd $ Add g <> Add h
 
