@@ -1,3 +1,4 @@
+{-# LANGUAGE ParallelListComp #-}
 
 module FormalLanguage.GrammarProduct.Op.Greibach where
 
@@ -86,14 +87,22 @@ aligned ls' rs' = go (groupBy ((==) `on` tSymb) ls') (groupBy ((==) `on` tSymb) 
     |  all tSymb l
     && all tSymb r  = goT l r : go ls rs
     |  all nSymbG l
-    && all nSymbG r = [ ns : gs | ns <- goN l r, gs <- go ls rs ]
+    && all nSymbG r = undefined -- [ ns : gs | ns <- goN l r, gs <- go ls rs ]
     |  all tSymb l  = epsR l : go ls     (r:rs)
     |  all tSymb r  = epsL r : go (l:ls) rs
   goT []     []     = []
   goT ls     []     = epsR ls
   goT []     rs     = epsL rs
   goT (l:ls) (r:rs) = (Symb $ l^.symb ++ r^.symb) : goT ls rs
-  goN = undefined
+  goN :: [Symb] -> [Symb] -> [[Symb]]
+  goN []     []     = [[]]
+  goN (l:ls) []     = epsR [l] : goN ls []
+  goN []     (r:rs) = epsL [r] : goN [] rs
+  goN lls rrs
+    | length lls == length rrs = [[ Symb $ l^.symb ++ r^.symb | l <- lls | r <- rrs ]]
+  goN lls@(l:ls) rrs@(r:rs)
+    | length lls  < length rrs = undefined
+    | length lls  > length rrs = undefined
   epsR ls = map (\(Symb s) -> Symb $ s ++ replicate dr (T "")) ls
   epsL rs = map (\(Symb s) -> Symb $ replicate dl (T "") ++ s) rs
 
