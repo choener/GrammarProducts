@@ -14,7 +14,14 @@ import Data.List (groupBy)
 import Data.Function (on)
 import Data.Maybe
 
+import Text.Trifecta  --
+import qualified Data.ByteString.Char8 as B
+import           Control.Monad.Trans.State.Strict
+import           Data.Default
+import           Text.Trifecta.Delta
+
 import FormalLanguage.Grammar
+import FormalLanguage.Parser
 
 
 
@@ -31,8 +38,8 @@ newtype TwoGNF = TwoGNF {runTwoGNF :: Grammar}
 
 instance Semigroup TwoGNF where
   (TwoGNF g) <> (TwoGNF h) = TwoGNF $ Grammar ts ns rs s where
-    ts = undefined
-    ns = undefined
+    ts = collectTerminals rs
+    ns = collectNonTerminals rs
     rs = S.fromList
        . map starRemove
        . catMaybes
@@ -45,7 +52,7 @@ instance Semigroup TwoGNF where
     a <.> b | (a^.lhs==g^.start) `exactlyOne` (b^.lhs==h^.start) = Nothing
     a <.> b = Just
             $ Rule (Symb $ a^.lhs.symb ++ b^.lhs.symb)
-                   undefined
+                   (Fun "fixme")
                    (zipWith (\x y -> Symb $ x^.symb ++ y^.symb) (a^.rhs) (b^.rhs))
     exactlyOne False True  = True
     exactlyOne True  False = True
@@ -65,6 +72,20 @@ instance Semigroup TwoGNF where
     starRemove = over rhs (filter (any (not . isEpsilon) . getSymbs))
     isEpsilon (T "") = True
     isEpsilon _      = False
+
+-- | Collect all terminal symbols from a set of rules.
+--
+-- TODO move to FormalGrammars library
+
+collectTerminals :: S.Set Rule -> S.Set Symb
+collectTerminals = S.fromList . filter tSymb . concatMap _rhs . S.toList
+
+-- | Collect all non-terminal symbols from a set of rules.
+--
+-- TODO move to FormalGrammars library
+
+collectNonTerminals :: S.Set Rule -> S.Set Symb
+collectNonTerminals = S.fromList . filter nSymb . concatMap _rhs . S.toList
 
 instance Monoid TwoGNF where
   mempty = TwoGNF $ Grammar S.empty S.empty (S.singleton undefined) (Symb [])
@@ -112,6 +133,27 @@ aligned ls' rs' = go (groupBy ((==) `on` tSymb) ls') (groupBy ((==) `on` tSymb) 
     | length lls  > length rrs = undefined
   epsR ls = map (\(Symb s) -> Symb $ s ++ replicate dr (T "")) ls
   epsL rs = map (\(Symb s) -> Symb $ replicate dl (T "") ++ s) rs
+
+
+twoGNFassociativity :: Bool
+twoGNFassociativity = l^.rules == r^.rules where
+  l = runTwoGNF $ (TwoGNF g <>  TwoGNF g) <> TwoGNF g
+  r = runTwoGNF $  TwoGNF g <> (TwoGNF g  <> TwoGNF g)
+  Success g = parseString
+                ((evalStateT . runGrammarP) grammar def)
+                (Directed (B.pack "testGrammar") 0 0 0 0)
+                twoGNF
+  twoGNF = unlines
+    [ "Grammar: TwoGNF"
+    , "NT: X"
+    , "NT: Y"
+    , "T:  a"
+    , "S:  X"
+    , "X -> term <<< a"
+    , "X -> one  <<< a X"
+    , "X -> two  <<< a X Y"
+    , "//"
+    ]
 
 
 
