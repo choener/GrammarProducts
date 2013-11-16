@@ -25,6 +25,8 @@ import FormalLanguage.Parser
 
 
 
+-- * Proof of associativity of the 2-GNF.
+
 -- | Wrap a grammar in 2-GNF form.
 --
 -- The 2-GNF has rules of the form: X -> a | aY | aYZ with "a" terminal, "Y",
@@ -133,27 +135,6 @@ aligned ls' rs' = go (groupBy ((==) `on` tSymb) ls') (groupBy ((==) `on` tSymb) 
     | length lls  > length rrs = undefined
   epsR ls = map (\(Symb s) -> Symb $ s ++ replicate dr (T "")) ls
   epsL rs = map (\(Symb s) -> Symb $ replicate dl (T "") ++ s) rs
-
-
-twoGNFassociativity :: Bool
-twoGNFassociativity = l^.rules == r^.rules where
-  l = runTwoGNF $ (TwoGNF g <>  TwoGNF g) <> TwoGNF g
-  r = runTwoGNF $  TwoGNF g <> (TwoGNF g  <> TwoGNF g)
-  Success g = parseString
-                ((evalStateT . runGrammarP) grammar def)
-                (Directed (B.pack "testGrammar") 0 0 0 0)
-                twoGNF
-  twoGNF = unlines
-    [ "Grammar: TwoGNF"
-    , "NT: X"
-    , "NT: Y"
-    , "T:  a"
-    , "S:  X"
-    , "X -> term <<< a"
-    , "X -> one  <<< a X"
-    , "X -> two  <<< a X Y"
-    , "//"
-    ]
 
 
 
