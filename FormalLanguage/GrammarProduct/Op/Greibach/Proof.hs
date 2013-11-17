@@ -1,3 +1,4 @@
+{-# LANGUAGE PatternGuards #-}
 {-# LANGUAGE ParallelListComp #-}
 
 module FormalLanguage.GrammarProduct.Op.Greibach.Proof where
@@ -29,7 +30,8 @@ import FormalLanguage.GrammarProduct.Op.Greibach
 
 -- * Proof of associativity of the 2-GNF.
 
-
+-- | Run the 2-gnf grammar with the TwoGNF monoid which observes the 2 star
+-- cases.
 
 twoGNFassociativity :: (S.Set Rule, S.Set Rule, S.Set Rule, S.Set Rule, Bool)
 twoGNFassociativity = ( l^.rules
@@ -39,6 +41,89 @@ twoGNFassociativity = ( l^.rules
                       , l^.rules == r^.rules)  where
   l = runTwoGNF $ (TwoGNF g <>  TwoGNF g) <> TwoGNF g
   r = runTwoGNF $  TwoGNF g <> (TwoGNF g  <> TwoGNF g)
+  g = twoGNFgrammar
+
+
+assocHelper l r = ( l^.rules
+                  , r^.rules
+                  , (l^.rules) S.\\ (r^.rules)
+                  , (r^.rules) S.\\ (l^.rules)
+                  , l^.rules == r^.rules)
+
+-- * Proof that the 2 star cases are actually needed. We loose associativity
+-- without those. As this version does not preserve associativity, we keep it
+-- here, instead of the general Greibach version.
+
+newtype FailGNF = FailGNF { runFailGNF :: Grammar }
+
+-- |
+--
+-- TODO check correctness
+
+instance Semigroup FailGNF where
+  (FailGNF g) <> (FailGNF h) = FailGNF $ Grammar ts ns rs s where
+    ts = collectTerminals rs
+    ns = collectNonTerminals rs
+    rs = S.fromList
+       . map starRemove
+       . concat
+       $ [ l <.> r
+         | l <- S.toList $ g^.rules
+         , r <- S.toList $ h^.rules
+         ]
+    s  = Symb $ g^.start.symb ++ h^.start.symb
+    (<.>) :: Rule -> Rule -> [Rule]
+    a <.> b | (a^.lhs==g^.start) `exactlyOne` (b^.lhs==h^.start) = []
+    a <.> b
+      | [s,m]   <- a^.rhs
+      , [t,n,o] <- b^.rhs
+      = [ Rule (Symb $ a^.lhs.symb ++ b^.lhs.symb)
+          (Fun "fixme")
+          [Symb $ s^.symb ++ t^.symb, Symb $ m^.symb ++ n^.symb, Symb $ stars (length $ m^.symb) ^.symb ++ o^.symb ]
+        , Rule (Symb $ a^.lhs.symb ++ b^.lhs.symb)
+          (Fun "fixme")
+          [Symb $ s^.symb ++ t^.symb, Symb $ stars (length $ m^.symb) ^.symb ++ n^.symb, Symb $ m^.symb ++ o^.symb ]
+        ]
+      | [s,m,o] <- a^.rhs
+      , [t,n]   <- b^.rhs
+      = [ Rule (Symb $ a^.lhs.symb ++ b^.lhs.symb)
+          (Fun "fixme")
+          [Symb $ s^.symb ++ t^.symb, Symb $ m^.symb ++ n^.symb, Symb $ o^.symb ++ stars (length $ m^.symb) ^.symb ]
+        , Rule (Symb $ a^.lhs.symb ++ b^.lhs.symb)
+          (Fun "fixme")
+          [Symb $ s^.symb ++ t^.symb, Symb $ m^.symb ++ stars (length $ m^.symb) ^.symb, Symb $ o^.symb ++ n^.symb ]
+        ]
+    a <.> b = [ Rule  (Symb $ a^.lhs.symb ++ b^.lhs.symb)
+                      (Fun "fixme")
+                      (take 3 $ zipWith (\l r -> Symb $ l^.symb ++ r^.symb) (a^.rhs ++ repeat (stars (gDim g)))
+                                                                            (b^.rhs ++ repeat (stars (gDim h)))
+                      )
+              ]
+    exactlyOne False True  = True
+    exactlyOne True  False = True
+    exactlyOne _     _     = False
+    stars :: Int -> Symb
+    stars k = Symb . replicate k $ T ""
+    -- | Remove star-online columns.
+    starRemove :: Rule -> Rule
+    starRemove = over rhs (filter (any (not . isEpsilon) . getSymbs))
+    isEpsilon (T "") = True
+    isEpsilon _      = False
+
+
+-- | Run the 2-gnf grammar without the star cases.
+
+-- noStarFailure :: (S.Set Rule, S.Set Rule, 
+noStarFailure = assocHelper l r where
+  l = runFailGNF $ (FailGNF g <>  FailGNF g) <> FailGNF g
+  r = runFailGNF $  FailGNF g <> (FailGNF g  <> FailGNF g)
+  g = twoGNFgrammar
+
+-- * The simple 2-gnf grammar to run the proof on.
+
+-- | Very simple 2-gnf form for proofs.
+
+twoGNFgrammar = g where
   Success g = parseString
                 ((evalStateT . runGrammarP) grammar def)
                 (Directed (B.pack "testGrammar") 0 0 0 0)

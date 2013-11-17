@@ -93,6 +93,8 @@ instance Monoid TwoGNF where
   mempty = TwoGNF $ Grammar S.empty S.empty (S.singleton undefined) (Symb [])
   mappend = (<>)
 
+
+
 -- | Takes lists of symbols and aligns according to being
 -- terminal/non-terminal:
 --
