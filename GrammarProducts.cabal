@@ -97,11 +97,14 @@ library
 --    BioInf.GrammarProducts.TH
   ghc-options:
 
---executable GramProd
---  build-depends:
---    cmdargs == 0.10.*
---  main-is:
---    GramProd.hs
+-- With grammar products, we need a refined way of turning input source files
+-- into LaTeX and Haskell modules.
+
+executable GramProdPP
+  build-depends:
+    cmdargs == 0.10.*
+  main-is:
+    GramProd.hs
 
 
 
