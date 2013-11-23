@@ -46,9 +46,12 @@ twoGNFassociativity = ( l
   r = runTwoGNF $  TwoGNF g <> (TwoGNF g  <> TwoGNF g)
   g = twoGNFgrammar
 
+twoGNFs = g where
+  g = runTwoGNF $ (TwoGNF h <> TwoGNF h)
+  h = twoGNFgrammar
 
-assocHelper l r = ( l^.rules
-                  , r^.rules
+assocHelper l r = ( l
+                  , r
                   , (l^.rules) S.\\ (r^.rules)
                   , (r^.rules) S.\\ (l^.rules)
                   , l^.rules == r^.rules)
@@ -143,13 +146,17 @@ twoGNFgrammar = case g of
         twoGNF
   twoGNF = unlines
     [ "Grammar: TwoGNF"
-    , "N: X"
-    , "N: Y"
+    , "N: A"
+    , "N: B"
+    , "N: C"
+    , "N: D"
     , "T: a"
-    , "S: X"
-    , "X -> term <<< a"
-    , "X -> one  <<< a X"
-    , "X -> two  <<< a X Y"
+    , "T: b"
+    , "T: c"
+--    , "S: X"
+    , "A -> three <<< a B C"
+    , "A -> two   <<< b D"
+    , "A -> one   <<< c"
     , "//"
     ]
 
