@@ -14,7 +14,9 @@ import Text.Printf
 import Data.List (groupBy)
 import Data.Function (on)
 import Data.Maybe
+import Control.Applicative
 
+import Text.PrettyPrint.ANSI.Leijen hiding ((<>))
 import Text.Trifecta  --
 import qualified Data.ByteString.Char8 as B
 import           Control.Monad.Trans.State.Strict
@@ -22,6 +24,7 @@ import           Data.Default
 import           Text.Trifecta.Delta
 
 import FormalLanguage.Grammar
+import FormalLanguage.Grammar.PrettyPrint.ANSI
 import FormalLanguage.Parser
 
 import FormalLanguage.GrammarProduct.Op.Greibach
@@ -61,9 +64,10 @@ newtype FailGNF = FailGNF { runFailGNF :: Grammar }
 -- TODO check correctness
 
 instance Semigroup FailGNF where
-  (FailGNF g) <> (FailGNF h) = FailGNF $ Grammar ts ns rs s where
+  (FailGNF g) <> (FailGNF h) = FailGNF $ Grammar ts ns es rs s where
     ts = collectTerminals rs
     ns = collectNonTerminals rs
+    es = g^.epsis <> h^.epsis
     rs = S.fromList
        . map starRemove
        . concat
@@ -71,30 +75,36 @@ instance Semigroup FailGNF where
          | l <- S.toList $ g^.rules
          , r <- S.toList $ h^.rules
          ]
-    s  = Symb $ g^.start.symb ++ h^.start.symb
+    s  = liftA2 (\l r -> Symb $ l^.symb ++ r^.symb) (g^.start) (h^.start)
     (<.>) :: Rule -> Rule -> [Rule]
-    a <.> b | (a^.lhs==g^.start) `exactlyOne` (b^.lhs==h^.start) = []
+    a <.> b | ((Just $ a^.lhs)==g^.start) `exactlyOne` ((Just $ b^.lhs)==h^.start) = []
     a <.> b
       | [s,m]   <- a^.rhs
       , [t,n,o] <- b^.rhs
       = [ Rule (Symb $ a^.lhs.symb ++ b^.lhs.symb)
-          (Fun "fixme")
+          (Fun "")
           [Symb $ s^.symb ++ t^.symb, Symb $ m^.symb ++ n^.symb, Symb $ stars (length $ m^.symb) ^.symb ++ o^.symb ]
         , Rule (Symb $ a^.lhs.symb ++ b^.lhs.symb)
-          (Fun "fixme")
+          (Fun "")
           [Symb $ s^.symb ++ t^.symb, Symb $ stars (length $ m^.symb) ^.symb ++ n^.symb, Symb $ m^.symb ++ o^.symb ]
         ]
       | [s,m,o] <- a^.rhs
       , [t,n]   <- b^.rhs
       = [ Rule (Symb $ a^.lhs.symb ++ b^.lhs.symb)
-          (Fun "fixme")
-          [Symb $ s^.symb ++ t^.symb, Symb $ m^.symb ++ n^.symb, Symb $ o^.symb ++ stars (length $ m^.symb) ^.symb ]
+          (Fun "")
+          [ Symb $ s^.symb ++ t^.symb
+          , Symb $ m^.symb ++ n^.symb
+          , Symb $ o^.symb ++ stars (length $ t^.symb) ^.symb
+          ]
         , Rule (Symb $ a^.lhs.symb ++ b^.lhs.symb)
-          (Fun "fixme")
-          [Symb $ s^.symb ++ t^.symb, Symb $ m^.symb ++ stars (length $ m^.symb) ^.symb, Symb $ o^.symb ++ n^.symb ]
+          (Fun "")
+          [ Symb $ s^.symb ++ t^.symb
+          , Symb $ m^.symb ++ stars (length $ t^.symb) ^.symb
+          , Symb $ o^.symb ++ n^.symb
+          ]
         ]
     a <.> b = [ Rule  (Symb $ a^.lhs.symb ++ b^.lhs.symb)
-                      (Fun "fixme")
+                      (Fun "")
                       (take 3 $ zipWith (\l r -> Symb $ l^.symb ++ r^.symb) (a^.rhs ++ repeat (stars (gDim g)))
                                                                             (b^.rhs ++ repeat (stars (gDim h)))
                       )
@@ -103,12 +113,12 @@ instance Semigroup FailGNF where
     exactlyOne True  False = True
     exactlyOne _     _     = False
     stars :: Int -> Symb
-    stars k = Symb . replicate k $ T ""
+    stars k = Symb . replicate k $ E ""
     -- | Remove star-online columns.
     starRemove :: Rule -> Rule
     starRemove = over rhs (filter (any (not . isEpsilon) . getSymbs))
-    isEpsilon (T "") = True
-    isEpsilon _      = False
+    isEpsilon (E _) = True
+    isEpsilon _     = False
 
 
 -- | Run the 2-gnf grammar without the star cases.
@@ -123,17 +133,20 @@ noStarFailure = assocHelper l r where
 
 -- | Very simple 2-gnf form for proofs.
 
-twoGNFgrammar = g where
-  Success g = parseString
-                ((evalStateT . runGrammarP) grammar def)
-                (Directed (B.pack "testGrammar") 0 0 0 0)
-                twoGNF
+twoGNFgrammar = case g of
+  Success g' -> g'
+  Failure f  -> error $ show f
+  where
+  g = parseString
+        ((evalStateT . runGrammarP) grammar def)
+        (Directed (B.pack "testGrammar") 0 0 0 0)
+        twoGNF
   twoGNF = unlines
     [ "Grammar: TwoGNF"
-    , "NT: X"
-    , "NT: Y"
-    , "T:  a"
-    , "S:  X"
+    , "N: X"
+    , "N: Y"
+    , "T: a"
+    , "S: X"
     , "X -> term <<< a"
     , "X -> one  <<< a X"
     , "X -> two  <<< a X Y"

@@ -49,8 +49,7 @@ library
   build-depends:
     base >= 4 && < 5,
 --    algebra,
---    ansi-wl-pprint ,
---    ansi-wl-pprint,
+    ansi-wl-pprint ,
     bytestring ,
     containers ,
     data-default,

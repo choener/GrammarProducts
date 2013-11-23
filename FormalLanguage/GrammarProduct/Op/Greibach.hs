@@ -13,6 +13,7 @@ import Text.Printf
 import Data.List (groupBy)
 import Data.Function (on)
 import Data.Maybe
+import Control.Applicative
 
 import Text.Trifecta  --
 import qualified Data.ByteString.Char8 as B
@@ -39,9 +40,10 @@ newtype TwoGNF = TwoGNF {runTwoGNF :: Grammar}
 -- TODO check if grammar is in 2-GNF!
 
 instance Semigroup TwoGNF where
-  (TwoGNF g) <> (TwoGNF h) = TwoGNF $ Grammar ts ns rs s where
+  (TwoGNF g) <> (TwoGNF h) = TwoGNF $ Grammar ts ns es rs s where
     ts = collectTerminals rs
     ns = collectNonTerminals rs
+    es = g^.epsis <> h^.epsis -- this is kind of sketchy
     rs = S.fromList
        . map starRemove
        . catMaybes
@@ -49,12 +51,12 @@ instance Semigroup TwoGNF where
          | l <- concatMap (starExtend $ gDim g) . S.toList $ g^.rules
          , r <- concatMap (starExtend $ gDim h) . S.toList $ h^.rules
          ]
-    s  = Symb $ g^.start.symb ++ h^.start.symb
+    s  = liftA2 (\l r -> Symb $ l^.symb ++ r^.symb) (g^.start) (h^.start) --  error "Start" -- Symb $ g^.start.symb ++ h^.start.symb
     (<.>) :: Rule -> Rule -> Maybe Rule
-    a <.> b | (a^.lhs==g^.start) `exactlyOne` (b^.lhs==h^.start) = Nothing
+    a <.> b | ((Just $ a^.lhs)==g^.start) `exactlyOne` ((Just $ b^.lhs)==h^.start) = Nothing
     a <.> b = Just
             $ Rule (Symb $ a^.lhs.symb ++ b^.lhs.symb)
-                   (Fun "fixme")
+                   (Fun "")
                    (zipWith (\x y -> Symb $ x^.symb ++ y^.symb) (a^.rhs) (b^.rhs))
     exactlyOne False True  = True
     exactlyOne True  False = True
@@ -68,12 +70,12 @@ instance Semigroup TwoGNF where
     -- assuming that we have a 2-gnf at most
     starExtend k r                = [r]
     stars :: Int -> Symb
-    stars k = Symb . replicate k $ T ""
+    stars k = Symb . replicate k $ E ""
     -- | Remove star-online columns.
     starRemove :: Rule -> Rule
     starRemove = over rhs (filter (any (not . isEpsilon) . getSymbs))
-    isEpsilon (T "") = True
-    isEpsilon _      = False
+    isEpsilon (E _) = True
+    isEpsilon _     = False
 
 -- | Collect all terminal symbols from a set of rules.
 --
@@ -89,8 +91,11 @@ collectTerminals = S.fromList . filter tSymb . concatMap _rhs . S.toList
 collectNonTerminals :: S.Set Rule -> S.Set Symb
 collectNonTerminals = S.fromList . filter nSymb . concatMap _rhs . S.toList
 
+-- | The start symbol for this instance needs to be "Just []" so as to preserve
+-- the start symbol in a chain of (<>) operations.
+
 instance Monoid TwoGNF where
-  mempty = TwoGNF $ Grammar S.empty S.empty (S.singleton undefined) (Symb [])
+  mempty = TwoGNF $ Grammar S.empty S.empty S.empty (S.singleton undefined) (Just $ Symb [])
   mappend = (<>)
 
 
