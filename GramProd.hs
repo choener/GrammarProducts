@@ -25,10 +25,11 @@ import Text.Printf
 import Text.Trifecta
 import Text.Trifecta.Delta
 
-import BioInf.GrammarProducts.Grammar
+import FormalLanguage.Grammar
+import FormalLanguage.Grammar.PrettyPrint.ANSI
+import FormalLanguage.Grammar.PrettyPrint.LaTeX
 import BioInf.GrammarProducts.LaTeX
-import BioInf.GrammarProducts.Haskell
-import BioInf.GrammarProducts.Parser
+import FormalLanguage.Parser
 
 
 

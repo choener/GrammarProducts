@@ -25,6 +25,7 @@ import           Text.Trifecta.Delta
 
 import FormalLanguage.Grammar
 import FormalLanguage.Grammar.PrettyPrint.ANSI
+import FormalLanguage.Grammar.PrettyPrint.LaTeX
 import FormalLanguage.Parser
 
 import FormalLanguage.GrammarProduct.Op.Greibach
@@ -85,29 +86,29 @@ instance Semigroup FailGNF where
       | [s,m]   <- a^.rhs
       , [t,n,o] <- b^.rhs
       = [ Rule (Symb $ a^.lhs.symb ++ b^.lhs.symb)
-          (Fun "")
+          [""]
           [Symb $ s^.symb ++ t^.symb, Symb $ m^.symb ++ n^.symb, Symb $ stars (length $ m^.symb) ^.symb ++ o^.symb ]
         , Rule (Symb $ a^.lhs.symb ++ b^.lhs.symb)
-          (Fun "")
+          [""]
           [Symb $ s^.symb ++ t^.symb, Symb $ stars (length $ m^.symb) ^.symb ++ n^.symb, Symb $ m^.symb ++ o^.symb ]
         ]
       | [s,m,o] <- a^.rhs
       , [t,n]   <- b^.rhs
       = [ Rule (Symb $ a^.lhs.symb ++ b^.lhs.symb)
-          (Fun "")
+          [""]
           [ Symb $ s^.symb ++ t^.symb
           , Symb $ m^.symb ++ n^.symb
           , Symb $ o^.symb ++ stars (length $ t^.symb) ^.symb
           ]
         , Rule (Symb $ a^.lhs.symb ++ b^.lhs.symb)
-          (Fun "")
+          [""]
           [ Symb $ s^.symb ++ t^.symb
           , Symb $ m^.symb ++ stars (length $ t^.symb) ^.symb
           , Symb $ o^.symb ++ n^.symb
           ]
         ]
     a <.> b = [ Rule  (Symb $ a^.lhs.symb ++ b^.lhs.symb)
-                      (Fun "")
+                      [""]
                       (take 3 $ zipWith (\l r -> Symb $ l^.symb ++ r^.symb) (a^.rhs ++ repeat (stars (gDim g)))
                                                                             (b^.rhs ++ repeat (stars (gDim h)))
                       )
@@ -140,10 +141,7 @@ twoGNFgrammar = case g of
   Success g' -> g'
   Failure f  -> error $ show f
   where
-  g = parseString
-        ((evalStateT . runGrammarP) grammar def)
-        (Directed (B.pack "testGrammar") 0 0 0 0)
-        twoGNF
+  g = parseGrammar "testGrammar" twoGNF
   twoGNF = unlines
     [ "Grammar: TwoGNF"
     , "N: A"

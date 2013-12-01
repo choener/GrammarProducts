@@ -56,7 +56,7 @@ instance Semigroup TwoGNF where
     a <.> b | ((Just $ a^.lhs)==g^.start) `exactlyOne` ((Just $ b^.lhs)==h^.start) = Nothing
     a <.> b = Just
             $ Rule (Symb $ a^.lhs.symb ++ b^.lhs.symb)
-                   (Fun "")
+                   [""]
                    (zipWith (\x y -> Symb $ x^.symb ++ y^.symb) (a^.rhs) (b^.rhs))
     exactlyOne False True  = True
     exactlyOne True  False = True
