@@ -2,18 +2,18 @@
 
 module FormalLanguage.GrammarProduct.Op.Greibach where
 
+import Control.Applicative
 import Control.Lens
 import Control.Lens.Fold
 import Control.Newtype ()
+import Data.Function (on)
 import Data.List (genericReplicate)
+import Data.List (groupBy)
+import Data.Maybe
 import Data.Monoid hiding ((<>))
 import Data.Semigroup
 import qualified Data.Set as S
 import Text.Printf
-import Data.List (groupBy)
-import Data.Function (on)
-import Data.Maybe
-import Control.Applicative
 
 import Text.Trifecta  --
 import qualified Data.ByteString.Char8 as B
@@ -23,6 +23,7 @@ import           Text.Trifecta.Delta
 
 import FormalLanguage.Grammar
 import FormalLanguage.Parser
+import FormalLanguage.GrammarProduct.Op.Common
 
 
 
@@ -40,7 +41,7 @@ newtype TwoGNF = TwoGNF {runTwoGNF :: Grammar}
 -- TODO check if grammar is in 2-GNF!
 
 instance Semigroup TwoGNF where
-  (TwoGNF g) <> (TwoGNF h) = TwoGNF $ Grammar ts ns es rs s where
+  (TwoGNF g) <> (TwoGNF h) = TwoGNF $ Grammar ts ns es rs s (g^.name ++ h^.name) where
     ts = collectTerminals rs
     ns = collectNonTerminals rs
     es = g^.epsis <> h^.epsis -- this is kind of sketchy
@@ -77,25 +78,11 @@ instance Semigroup TwoGNF where
     isEpsilon (E _) = True
     isEpsilon _     = False
 
--- | Collect all terminal symbols from a set of rules.
---
--- TODO move to FormalGrammars library
-
-collectTerminals :: S.Set Rule -> S.Set Symb
-collectTerminals = S.fromList . filter tSymb . concatMap _rhs . S.toList
-
--- | Collect all non-terminal symbols from a set of rules.
---
--- TODO move to FormalGrammars library
-
-collectNonTerminals :: S.Set Rule -> S.Set Symb
-collectNonTerminals = S.fromList . filter nSymb . concatMap _rhs . S.toList
-
 -- | The start symbol for this instance needs to be "Just []" so as to preserve
 -- the start symbol in a chain of (<>) operations.
 
 instance Monoid TwoGNF where
-  mempty = TwoGNF $ Grammar S.empty S.empty S.empty (S.singleton undefined) (Just $ Symb [])
+  mempty = TwoGNF $ Grammar S.empty S.empty S.empty (S.singleton undefined) (Just $ Symb []) ""
   mappend = (<>)
 
 

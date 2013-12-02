@@ -68,7 +68,7 @@ newtype FailGNF = FailGNF { runFailGNF :: Grammar }
 -- TODO check correctness
 
 instance Semigroup FailGNF where
-  (FailGNF g) <> (FailGNF h) = FailGNF $ Grammar ts ns es rs s where
+  (FailGNF g) <> (FailGNF h) = FailGNF $ Grammar ts ns es rs s (g^.name ++ h^.name) where
     ts = collectTerminals rs
     ns = collectNonTerminals rs
     es = g^.epsis <> h^.epsis
