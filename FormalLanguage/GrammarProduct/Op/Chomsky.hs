@@ -1,3 +1,4 @@
+{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE PatternGuards #-}
 
 module FormalLanguage.GrammarProduct.Op.Chomsky where
@@ -49,12 +50,12 @@ chomskyCombine (Rule l f rs) (Rule a g bs)
   | [r1,r2] <- rs, [b1,b2] <- bs, nSymb r1, nSymb r2, nSymb b1, nSymb b2
   = [Rule (Symb $ l^.symb ++ a^.symb) (f++g) [Symb $ r1^.symb ++ b1^.symb, Symb $ r2^.symb ++ b2^.symb]]
   | [r] <- rs, [b1,b2] <- bs, tSymb r, nSymb b1, nSymb b2
-  = {- concatMap extendRederive -}
+  = concatMap extendRederive
       [Rule (Symb $ l^.symb ++ a^.symb) (f++g) [Symb $ r^.symb  ++ b1^.symb, Symb $ genEps r ++ b2^.symb]
       ,Rule (Symb $ l^.symb ++ a^.symb) (f++g) [Symb $ genEps r ++ b1^.symb, Symb $ r^.symb  ++ b2^.symb]
       ]
   | [r1,r2] <- rs, [b] <- bs, nSymb r1, nSymb r2, tSymb b
-  = {- concatMap extendRederive -}
+  = concatMap extendRederive
       [Rule (Symb $ l^.symb ++ a^.symb) (f++g) [Symb $ r1^.symb ++ b^.symb , Symb $ r2^.symb ++ genEps b]
       ,Rule (Symb $ l^.symb ++ a^.symb) (f++g) [Symb $ r1^.symb ++ genEps b, Symb $ r2^.symb ++ b^.symb ]
       ]
@@ -62,14 +63,35 @@ chomskyCombine (Rule l f rs) (Rule a g bs)
 
 -- | Extend mixed rules and rederive CNF
 
-{-
 extendRederive :: Rule -> [Rule]
 extendRederive (Rule l f [r]) | tSymb r = [Rule l f [r]]
 extendRederive (Rule l f [r1,r2])
   | not (tSymb r1) && not (nSymb r1) && nSymb r2
-  = [Rule (Symb $ l^.symb ++ a^.
+  = let (newN,epsN,trmN,epsT) = genNewSymbols r1
+    in  [ Rule l    f           [newN,r2]
+        , Rule newN ("nwNL_":f) [epsN,trmN]
+        , Rule newN ("nwNR_":f) [trmN,epsN]
+        , Rule trmN ("trmN_":f) [epsT]
+        ]
+  | nSymb r1 && not (tSymb r2) && not (nSymb r2)
+  = let (newN,epsN,trmN,epsT) = genNewSymbols r2
+    in  [ Rule l    f           [r1,newN]
+        , Rule newN ("nwNL_":f) [epsN,trmN]
+        , Rule newN ("nwNR_":f) [trmN,epsN]
+        , Rule trmN ("trmN_":f) [epsT]
+        ]
 extendRederive r = error $ "cannot handle (rule not in extendRederive form for CNF): " ++ show r
--}
+
+genNewSymbols :: Symb -> (Symb,Symb,Symb,Symb)
+genNewSymbols x = (newN, epsN, trmN, epsT) where
+  -- the new non-terminal, with term TN's replaced by non-term TN with same name (plus extension)
+  newN = Symb . map (\case (T s) -> N ("N"++s) Singular ; z -> z) $ x^.symb
+  -- the new non-terminal, with terms replaced by epsilons
+  epsN = Symb . map (\case (T s) -> eps                 ; z -> z) $ x^.symb
+  -- the new non-terminal for the terminal symbol, with terms replaced by non-term symbols
+  trmN = Symb . map (\case (T s) -> N ("T"++s) Singular ; z -> z) $ x^.symb
+  -- finally the terminal 
+  epsT = Symb . map (\case (N _ _) -> eps               ; z -> z) $ x^.symb
 
 -- | Generate a certain number of epsilons
 
