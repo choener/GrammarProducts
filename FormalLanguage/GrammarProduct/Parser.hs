@@ -71,7 +71,7 @@ grammarProduct gs = do
   n <- identGI
   e <- getGrammar <$> expr (M.fromList [(g^.name,g) | g<-gs])
   reserveGI "//"
-  return e
+  return $ over (name) (const n) e
 
 expr :: Map String Grammar -> Parse ExprGrammar
 expr g = e where

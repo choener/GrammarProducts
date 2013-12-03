@@ -62,7 +62,7 @@ optionHaskell = Haskell
   }
 
 main = do
-  o <- cmdArgs $ modes [optionLatex,optionAnsi]
+  o <- cmdArgs $ modes [optionLatex,optionAnsi,optionHaskell]
   pr <- case (inFile o) of
           "" -> getContents >>= return . parseProduct "stdin"
           fn -> readFile fn >>= return . parseProduct fn
