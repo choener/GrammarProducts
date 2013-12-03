@@ -40,8 +40,8 @@ import FormalLanguage.GrammarProduct.Op.Add
 (><) :: Grammar -> Grammar -> Grammar
 g >< h
   | isLeftLinear g && isLeftLinear h = undefined
-  | isChomskyNF  g && isChomskyNF  h = undefined
-  | isGreibachNF g && isGreibachNF h = undefined
+  | isChomskyNF  g && isChomskyNF  h = runCNF $ CNF g <> CNF h
+  | isGreibachNF g && isGreibachNF h = runTwoGNF $ TwoGNF g <> TwoGNF h
   | otherwise                        = error "Grammars in general CFG form are not handled. You need to convert into either Greibach- or Chomsky normal form. This might change in the future"
 
 -- | The addition operation defined for two grammars of the same dimension. It

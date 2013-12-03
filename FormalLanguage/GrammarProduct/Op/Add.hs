@@ -34,6 +34,7 @@ instance Semigroup (Add Grammar) where
                                 (l^.epsis <> r^.epsis)
                                 (l^.rules <> r^.rules <> t)
                                 s
+                                (l^.name  <> r^.name)
     where s = case (l^.start,r^.start) of
                 (Nothing, Nothing) -> Nothing
                 (Nothing, Just k ) -> Just k
@@ -47,7 +48,7 @@ instance Semigroup (Add Grammar) where
                                 --  else error "maybe add another rule and a unique start symbol?")
 
 instance Monoid (Add Grammar) where
-  mempty = Add $ Grammar S.empty S.empty S.empty S.empty Nothing
+  mempty = Add $ Grammar S.empty S.empty S.empty S.empty Nothing ""
   mappend = (<>)
 
 -- idempotency is not made explicit here

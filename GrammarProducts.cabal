@@ -79,9 +79,11 @@ library
     PrimitiveArray >= 0.5.1.0
   exposed-modules:
     FormalLanguage.GrammarProduct
+    FormalLanguage.GrammarProduct.Op.Add
+    FormalLanguage.GrammarProduct.Op.Common
     FormalLanguage.GrammarProduct.Op.Greibach
     FormalLanguage.GrammarProduct.Op.Chomsky
-    FormalLanguage.GrammarProduct.Op.LinearDirect
+    FormalLanguage.GrammarProduct.Op.Linear
 --    BioInf.GrammarProducts
 --    BioInf.GrammarProducts.Grammar
 --    BioInf.GrammarProducts.Haskell

@@ -23,6 +23,7 @@ import           Text.Trifecta.Delta
 
 import FormalLanguage.Grammar
 import FormalLanguage.Parser
+
 import FormalLanguage.GrammarProduct.Op.Common
 
 

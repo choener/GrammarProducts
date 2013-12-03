@@ -152,9 +152,6 @@ symbToRules u' l'
 
 -- | Generate a certain number of epsilons
 
-genEps :: Symb -> [TN]
-genEps s = replicate (length $ s^.symb) eps
-
 genTermStar :: Symb -> [TN]
 genTermStar s = map (\case (T s) -> N ("S"++s) Singular ; z -> z) $ s^.symb
 

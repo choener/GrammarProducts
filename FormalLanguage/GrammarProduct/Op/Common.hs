@@ -2,6 +2,7 @@
 module FormalLanguage.GrammarProduct.Op.Common where
 
 import qualified Data.Set as S
+import Control.Lens
 
 import FormalLanguage.Grammar
 
@@ -20,4 +21,7 @@ collectTerminals = S.fromList . filter tSymb . concatMap _rhs . S.toList
 
 collectNonTerminals :: S.Set Rule -> S.Set Symb
 collectNonTerminals = S.fromList . filter nSymb . concatMap _rhs . S.toList
+
+genEps :: Symb -> [TN]
+genEps s = replicate (length $ s^.symb) eps
 
