@@ -23,7 +23,7 @@ collectTerminals = S.fromList . filter tSymb . concatMap _rhs . S.toList
 -- TODO move to FormalGrammars library
 
 collectNonTerminals :: S.Set Rule -> S.Set Symb
-collectNonTerminals = S.fromList . filter nSymb . concatMap _rhs . S.toList
+collectNonTerminals = S.fromList . filter nSymb . concatMap (\r -> r^.lhs : r^.rhs) . S.toList
 
 collectEpsilons :: S.Set Rule -> S.Set TN
 collectEpsilons = S.fromList

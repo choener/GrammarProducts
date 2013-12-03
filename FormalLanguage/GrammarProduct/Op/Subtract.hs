@@ -20,7 +20,7 @@ import FormalLanguage.GrammarProduct.Op.Common
 
 subtract :: Grammar -> Grammar -> Grammar
 subtract l r
-    | gDim l /= gDim r = error $ printf "grammars %s and %s have different dimensions, cannot unify." (show l) (show r)
+    | gDim l /= gDim r = error $ printf "grammars %s and %s have different dimensions, cannot unify. (subtract)" (show l) (show r)
     | otherwise        = Grammar ts ns es rs s (l^.name ++ r^.name) where
         ts = collectTerminals rs
         ns = collectNonTerminals rs

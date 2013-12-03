@@ -30,7 +30,7 @@ instance Semigroup (Linear Grammar) where
     ts = g^.tsyms <> h^.tsyms
     ns = collectNonTerminals rs
     es = g^.epsis <> h^.epsis
-    rs = S.fromList [ direct l r | l <- g^..rules.folded, r <- g^..rules.folded ]
+    rs = S.fromList [ direct l r | l <- g^..rules.folded, r <- h^..rules.folded ]
     s  = liftA2 (\l r -> Symb $ l^.symb ++ r^.symb) (g^.start) (h^.start)
     direct (Rule l f rs) (Rule a g bs) = Rule (Symb $ l^.symb ++ a^.symb) (f++g) (mergeRHS rs bs)
 

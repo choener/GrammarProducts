@@ -63,14 +63,13 @@ optionHaskell = Haskell
 
 main = do
   o <- cmdArgs $ modes [optionLatex,optionAnsi]
-  print o
   pr <- case (inFile o) of
           "" -> getContents >>= return . parseProduct "stdin"
           fn -> readFile fn >>= return . parseProduct fn
   case pr of
-    Failure f -> printDoc f
+    Failure f -> putStrLn "failed:" >> printDoc f
     Success [] -> error "you did provide input?!"
-    Success (s:_) -> case o of
+    Success (s:ss) -> case o of
       LaTeX{..} -> case outFile of
         "" -> error "need to set output file name"
         fn -> renderFile fn $ renderLaTeX 2 s

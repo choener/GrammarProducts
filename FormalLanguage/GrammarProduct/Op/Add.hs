@@ -28,7 +28,12 @@ newtype Add a = Add {runAdd :: a}
 
 instance Semigroup (Add Grammar) where
   (Add l) <> (Add r)
-    | gDim l /= gDim r = error $ printf "ERROR: grammars \n%s\n and \n%s\n have different dimensions, cannot unify." (show l) (show r)
+    | gDim l /= gDim r
+    = error $ printf "ERROR: grammars \n%s\n and \n%s\n have different dimensions, cannot unify. (add %d %d)"
+                (show l)
+                (show r)
+                (gDim l)
+                (gDim r)
     | otherwise = Add $ Grammar (l^.tsyms <> r^.tsyms)
                                 (l^.nsyms <> r^.nsyms) -- TODO add the newly created symbol to the non-terminals (or maybe just run ``fix T+N 's from the rules?'')
                                 (l^.epsis <> r^.epsis)

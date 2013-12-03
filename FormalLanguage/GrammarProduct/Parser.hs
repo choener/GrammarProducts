@@ -45,11 +45,6 @@ import FormalLanguage.Grammar
 import FormalLanguage.Parser
 
 import FormalLanguage.GrammarProduct
-{-
-import BioInf.GrammarProducts.Op.Add
-import BioInf.GrammarProducts.Op.Subtract
-import BioInf.GrammarProducts.Op.Power
--}
 
 
 
@@ -63,8 +58,9 @@ parseProduct fname cnts = parseString
 
 -- | Parse all grammars and grammar products, prepending to the list.
 
-productParser = go [] where
+productParser = go [] <* eof where
   go gs = do
+    whiteSpace
     g' <- option Nothing $ Just <$> (try grammar <|> grammarProduct gs)
     case g' of
       Nothing -> return gs
