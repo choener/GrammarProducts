@@ -28,11 +28,62 @@ import Text.Trifecta.Delta
 import FormalLanguage.Grammar
 import FormalLanguage.Grammar.PrettyPrint.ANSI
 import FormalLanguage.Grammar.PrettyPrint.LaTeX
-import BioInf.GrammarProducts.LaTeX
-import FormalLanguage.Parser
+import FormalLanguage.Grammar.PrettyPrint.Haskell
+import FormalLanguage.GrammarProduct.Parser
 
 
 
+data Options
+  = LaTeX
+    { inFile :: String
+    , outFile ::String
+    }
+  | Ansi
+    { inFile :: String
+    }
+  | Haskell
+    { inFile :: String
+    , outFile :: String
+    }
+  deriving (Show,Data,Typeable)
+
+optionLatex = LaTeX
+  { inFile = ""
+  , outFile = ""
+  }
+
+optionAnsi = Ansi
+  { inFile = ""
+  }
+
+optionHaskell = Haskell
+  { inFile = ""
+  , outFile = ""
+  }
+
+main = do
+  o <- cmdArgs $ modes [optionLatex,optionAnsi]
+  print o
+  pr <- case (inFile o) of
+          "" -> getContents >>= return . parseProduct "stdin"
+          fn -> readFile fn >>= return . parseProduct fn
+  case pr of
+    Failure f -> printDoc f
+    Success [] -> error "you did provide input?!"
+    Success (s:_) -> case o of
+      LaTeX{..} -> case outFile of
+        "" -> error "need to set output file name"
+        fn -> renderFile fn $ renderLaTeX 2 s
+      Ansi {..} -> printDoc $ grammarDoc s
+      Haskell{..} -> case outFile of
+        "" -> printDoc $ grammarHaskell s
+        fn -> do h <- openFile fn WriteMode
+                 hPutDoc h $ grammarHaskell s
+                 hClose h
+
+
+
+{-
 main :: IO ()
 main = do
   o <- cmdArgs $ modes [optionLatex, optionHaskell]
@@ -76,4 +127,5 @@ optionLatex = Latex
 optionHaskell = Haskell
   {
   }
+-}
 

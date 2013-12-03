@@ -1,6 +1,6 @@
 {-# LANGUAGE FlexibleInstances #-}
 
-module BioInf.GrammarProducts.Op.Subtract where
+module FormalLanguage.GrammarProduct.Op.Subtract where
 
 import Control.Newtype
 import Data.Semigroup

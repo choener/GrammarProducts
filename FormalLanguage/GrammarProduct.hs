@@ -8,6 +8,9 @@
 
 module FormalLanguage.GrammarProduct
   ( (><)
+  , gAdd
+  , gSubtract
+  , gPower
   ) where
 
 import Data.Monoid
@@ -16,8 +19,20 @@ import FormalLanguage.Grammar
 
 import FormalLanguage.GrammarProduct.Op.Greibach as Greibach
 import FormalLanguage.GrammarProduct.Op.Chomsky  as Chomsky
-import FormalLanguage.GrammarProduct.Op.LinearDirect as Linear
+import FormalLanguage.GrammarProduct.Op.Linear   as Linear
 import FormalLanguage.GrammarProduct.Op.Add
+import FormalLanguage.GrammarProduct.Op.Subtract as S
+import FormalLanguage.GrammarProduct.Op.Power as P
+
+
+
+-- |
+
+gAdd g h = runAdd $ (Add g) <> (Add h)
+
+gSubtract g h = S.subtract g h
+
+gPower = P.power
 
 
 

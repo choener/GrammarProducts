@@ -57,7 +57,7 @@ library
 --    haskell-src ,
 --    haskell-src-exts,
 --    haskell-src-meta,
---    HaTeX,
+    HaTeX,
     lens ,
 --    nats,
     newtype,
@@ -86,12 +86,12 @@ library
     FormalLanguage.GrammarProduct.Op.Linear
     FormalLanguage.GrammarProduct.Op.Power
     FormalLanguage.GrammarProduct.Op.Subtract
+    FormalLanguage.GrammarProduct.Parser
 --    BioInf.GrammarProducts
 --    BioInf.GrammarProducts.Grammar
 --    BioInf.GrammarProducts.Haskell
 --    BioInf.GrammarProducts.Helper
 --    BioInf.GrammarProducts.LaTeX
---    BioInf.GrammarProducts.Parser
 --    BioInf.GrammarProducts.Tools
 --    BioInf.GrammarProducts.TH
   ghc-options:

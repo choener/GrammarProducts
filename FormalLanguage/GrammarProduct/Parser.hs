@@ -6,7 +6,10 @@
 {-# LANGUAGE NoMonomorphismRestriction #-}
 {-# LANGUAGE OverloadedStrings #-}
 
-module BioInf.GrammarProducts.Parser where
+-- | This parser extends the @FormalLanguage.Parser@ parser of single- and
+-- multi-dim grammars to accept grammar product definitions as well.
+
+module FormalLanguage.GrammarProduct.Parser where
 
 import Control.Arrow
 import Control.Applicative
@@ -21,8 +24,8 @@ import Data.Map (Map)
 import Data.Set (Set)
 import Debug.Trace
 import Data.List
-import qualified Data.ByteString as B
-import qualified Data.HashSet as H
+import qualified Data.ByteString.Char8 as B
+--import qualified Data.HashSet as H
 import qualified Data.Map as M
 import qualified Data.Set as S
 import Text.Parser.Expression
@@ -34,17 +37,77 @@ import Text.Trifecta.Delta
 import Text.Trifecta.Result
 import Data.Semigroup ((<>),times1p)
 import qualified Control.Newtype as T
-import Numeric.Natural.Internal
+--import Numeric.Natural.Internal
 import Prelude hiding (subtract)
+import Control.Monad
 
-import BioInf.GrammarProducts.Grammar
-import BioInf.GrammarProducts.Op.Direct
+import FormalLanguage.Grammar
+import FormalLanguage.Parser
+
+import FormalLanguage.GrammarProduct
+{-
 import BioInf.GrammarProducts.Op.Add
 import BioInf.GrammarProducts.Op.Subtract
 import BioInf.GrammarProducts.Op.Power
+-}
 
 
 
+-- | Parse a product grammar.
+
+parseProduct :: String -> String -> Result [Grammar]
+parseProduct fname cnts = parseString
+  ((evalStateT . runGrammarP) productParser def)
+  (Directed (B.pack fname) 0 0 0 0)
+  cnts
+
+-- | Parse all grammars and grammar products, prepending to the list.
+
+productParser = go [] where
+  go gs = do
+    g' <- option Nothing $ Just <$> (try grammar <|> grammarProduct gs)
+    case g' of
+      Nothing -> return gs
+      Just g  -> go (g:gs)
+
+grammarProduct gs = do
+  reserveGI "Product:"
+  n <- identGI
+  e <- getGrammar <$> expr (M.fromList [(g^.name,g) | g<-gs])
+  reserveGI "//"
+  return e
+
+expr :: Map String Grammar -> Parse ExprGrammar
+expr g = e where
+  e = buildExpressionParser table term
+  table = [ [ binary "^><" highDirect AssocLeft
+            ]
+          , [ binary "><"  exprDirect AssocLeft
+            , binary "*"   exprPower  AssocLeft
+            ]
+          , [ binary "+"   exprPlus   AssocLeft
+            , binary "-"   exprMinus  AssocLeft
+            ]
+          ]
+  term  =   parens e
+        <|> (choice gts <?> "previously defined grammar")
+        <|> (ExprNumber <$> natural <?> "integral power of grammar")
+  gts = map (fmap ExprGrammar . gterm) $ M.assocs g
+  binary n f a = Infix (f <$ reserveGI n) a
+  exprDirect l r = ExprGrammar $ (getGrammar l >< getGrammar r)
+  exprPlus   l r = ExprGrammar $ gAdd (getGrammar l) (getGrammar r)
+  exprMinus  l r = ExprGrammar $ gSubtract (getGrammar l) (getGrammar r)
+  exprPower  l r = ExprGrammar $ gPower (getGrammar l) (getNumber r)
+  highDirect l r = error "highDirect (not active)!" -- ExprGrammar . unDirect $ times1p (Natural $ getNumber r -1) (Direct $ getGrammar l)
+
+data ExprGrammar
+  = ExprGrammar { getGrammar :: Grammar }
+  | ExprNumber  { getNumber  :: Integer }
+
+gterm :: (String,Grammar) -> Parse Grammar
+gterm (s,g) = g <$ reserveGI s
+
+{-
 data GS = GS
   { _ntsyms     :: Map String Integer
   , _tsyms      :: Set String
@@ -292,4 +355,5 @@ type ParseG a = (Monad m, TokenParsing m, MonadPlus m) => m a
 instance MonadTrans Unlined where
   lift = Unlined
   {-# INLINE lift #-}
+-}
 
