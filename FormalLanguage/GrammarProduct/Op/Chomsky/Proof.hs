@@ -49,6 +49,8 @@ cNFs = g where
   g = runCNF $ (CNF h <> CNF h)
   h = cNFgrammar
 
+showTwo = printDoc $ grammarDoc $ runCNF  $ CNF cNFgrammar <> CNF cNFgrammar
+
 -- * The simple 2-gnf grammar to run the proof on.
 
 -- | Very simple 2-gnf form for proofs.
@@ -63,9 +65,12 @@ cNFgrammar = case g of
     , "N: A"
     , "N: B"
     , "N: C"
+--    , "N: Sa"
     , "T: a"
-    , "A -> two <<< BC"
-    , "A -> one <<< a"
+    , "A  -> twoN <<< B C"
+    , "A  -> oneT <<< a"
+--    , "A  -> oneN <<< Sa"
+--    , "Sa -> oneT <<< a"
     , "//"
     ]
 
