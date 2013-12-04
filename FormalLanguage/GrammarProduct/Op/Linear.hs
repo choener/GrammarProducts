@@ -61,8 +61,8 @@ mergeRHS ls' rs' = concat $ go (groupRHS ls') (groupRHS rs') where
     | all nSymb l && all nSymb r = let [Symb y] = l
                                        [Symb z] = r
                                    in  [Symb $ y++z] : go ls rs
-    | all tSymb l = go [l] []  ++ go ls     (r:rs)
-    | all tSymb r = go []  [r] ++ go (l:ls) rs
+    | all nSymb l = go [l] []  ++ go ls     (r:rs)
+    | all nSymb r = go []  [r] ++ go (l:ls) rs
     | otherwise   = go [l] []  ++ go [] [r] ++ go ls rs
   goT []            []            = []
   goT []            (Symb t : rs) = Symb (genEps dl ++ t) : goT [] rs
