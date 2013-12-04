@@ -81,8 +81,10 @@ library
     FormalLanguage.GrammarProduct
     FormalLanguage.GrammarProduct.Op.Add
     FormalLanguage.GrammarProduct.Op.Chomsky
+    FormalLanguage.GrammarProduct.Op.Chomsky.Proof
     FormalLanguage.GrammarProduct.Op.Common
     FormalLanguage.GrammarProduct.Op.Greibach
+    FormalLanguage.GrammarProduct.Op.Greibach.Proof
     FormalLanguage.GrammarProduct.Op.Linear
     FormalLanguage.GrammarProduct.Op.Power
     FormalLanguage.GrammarProduct.Op.Subtract
