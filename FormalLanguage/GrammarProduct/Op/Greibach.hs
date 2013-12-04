@@ -72,12 +72,12 @@ instance Semigroup TwoGNF where
     -- assuming that we have a 2-gnf at most
     starExtend k r                = [r]
     stars :: Int -> Symb
-    stars k = Symb . replicate k $ E ""
+    stars k = Symb $ replicate k E
     -- | Remove star-online columns.
     starRemove :: Rule -> Rule
     starRemove = over rhs (filter (any (not . isEpsilon) . getSymbs))
-    isEpsilon (E _) = True
-    isEpsilon _     = False
+    isEpsilon E = True
+    isEpsilon _ = False
 
 -- | The start symbol for this instance needs to be "Just []" so as to preserve
 -- the start symbol in a chain of (<>) operations.
@@ -100,8 +100,9 @@ instance Monoid TwoGNF where
 -- terminals. This will create all possible "alignments" of symbols. This is
 -- why we return a list of lists.
 
+{-
 aligned :: [Symb] -> [Symb] -> [[Symb]]
-aligned ls' rs' = go (groupBy ((==) `on` tSymb) ls') (groupBy ((==) `on` tSymb) rs') where
+aligned ls' rs' = go (groupBy ((==) `on` isSymbT) ls') (groupBy ((==) `on` isSymbT) rs') where
   dl = length . getSymbs . head $ ls'
   dr = length . getSymbs . head $ rs'
   go :: [[Symb]] -> [[Symb]] -> [[Symb]]
@@ -109,12 +110,12 @@ aligned ls' rs' = go (groupBy ((==) `on` tSymb) ls') (groupBy ((==) `on` tSymb) 
   go (l:ls) []     = epsR l : go ls []
   go []     (r:rs) = epsL r : go [] rs
   go (l:ls) (r:rs)
-    |  all tSymb l
-    && all tSymb r  = goT l r : go ls rs
-    |  all nSymbG l
-    && all nSymbG r = undefined -- [ ns : gs | ns <- goN l r, gs <- go ls rs ]
-    |  all tSymb l  = epsR l : go ls     (r:rs)
-    |  all tSymb r  = epsL r : go (l:ls) rs
+    |  all isSymbT l
+    && all isSymbT r = goT l r : go ls rs
+    |  all isSymbN l
+    && all isSymbN r = undefined -- [ ns : gs | ns <- goN l r, gs <- go ls rs ]
+    |  all isSymbT l = epsR l : go ls     (r:rs)
+    |  all isSymbT r = epsL r : go (l:ls) rs
   goT []     []     = []
   goT ls     []     = epsR ls
   goT []     rs     = epsL rs
@@ -130,4 +131,5 @@ aligned ls' rs' = go (groupBy ((==) `on` tSymb) ls') (groupBy ((==) `on` tSymb) 
     | length lls  > length rrs = undefined
   epsR ls = map (\(Symb s) -> Symb $ s ++ replicate dr (T "")) ls
   epsL rs = map (\(Symb s) -> Symb $ replicate dl (T "") ++ s) rs
+-}
 

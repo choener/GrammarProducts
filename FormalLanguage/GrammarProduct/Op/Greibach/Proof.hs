@@ -118,12 +118,12 @@ instance Semigroup FailGNF where
     exactlyOne True  False = True
     exactlyOne _     _     = False
     stars :: Int -> Symb
-    stars k = Symb . replicate k $ E ""
+    stars k = Symb $ replicate k E
     -- | Remove star-online columns.
     starRemove :: Rule -> Rule
     starRemove = over rhs (filter (any (not . isEpsilon) . getSymbs))
-    isEpsilon (E _) = True
-    isEpsilon _     = False
+    isEpsilon E = True
+    isEpsilon _ = False
 
 
 -- | Run the 2-gnf grammar without the star cases.

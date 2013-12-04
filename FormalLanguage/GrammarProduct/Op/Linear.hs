@@ -49,25 +49,25 @@ mergeRHS ls' rs' = concat $ go (groupRHS ls') (groupRHS rs') where
   dr = head rs'
   go [] [] = []
   go [] (r:rs)
-    | all tSymb r = map (\(Symb z) -> Symb $ genEps dl ++ z) r : go [] rs
-    | all nSymb r = let [Symb z] = r
-                    in  [Symb $ genEps dl ++ z] : go [] rs
+    | all isSymbT r = map (\(Symb z) -> Symb $ genEps dl ++ z) r : go [] rs
+    | all isSymbN r = let [Symb z] = r
+                      in  [Symb $ genEps dl ++ z] : go [] rs
   go (l:ls) []
-    | all tSymb l = map (\(Symb z) -> Symb $ z ++ genEps dr) l : go ls []
-    | all nSymb l = let [Symb z] = l
-                    in  [Symb $ z ++ genEps dr] : go ls []
+    | all isSymbT l = map (\(Symb z) -> Symb $ z ++ genEps dr) l : go ls []
+    | all isSymbN l = let [Symb z] = l
+                      in  [Symb $ z ++ genEps dr] : go ls []
   go (l:ls) (r:rs)
-    | all tSymb l && all tSymb r = goT l r : go ls rs
-    | all nSymb l && all nSymb r = let [Symb y] = l
-                                       [Symb z] = r
-                                   in  [Symb $ y++z] : go ls rs
-    | all nSymb l = go [l] []  ++ go ls     (r:rs)
-    | all nSymb r = go []  [r] ++ go (l:ls) rs
-    | otherwise   = go [l] []  ++ go [] [r] ++ go ls rs
+    | all isSymbT l && all isSymbT r = goT l r : go ls rs
+    | all isSymbN l && all isSymbN r = let [Symb y] = l
+                                           [Symb z] = r
+                                       in  [Symb $ y++z] : go ls rs
+    | all isSymbN l = go [l] []  ++ go ls     (r:rs)
+    | all isSymbN r = go []  [r] ++ go (l:ls) rs
+    | otherwise     = go [l] []  ++ go [] [r] ++ go ls rs
   goT []            []            = []
   goT []            (Symb t : rs) = Symb (genEps dl ++ t) : goT [] rs
   goT (Symb t : ls) []            = Symb (t ++ genEps dr) : goT ls []
   goT (Symb u : ls) (Symb v : rs) = Symb (u++v)           : goT ls rs
 
-groupRHS = groupBy ((==) `on` tSymb)
+groupRHS = groupBy ((==) `on` isSymbT)
 

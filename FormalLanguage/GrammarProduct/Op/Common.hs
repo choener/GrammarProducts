@@ -16,22 +16,22 @@ import FormalLanguage.Grammar
 -- TODO i guess, this collects multidim stuff for now!!!
 
 collectTerminals :: S.Set Rule -> S.Set Symb
-collectTerminals = S.fromList . filter tSymb . concatMap _rhs . S.toList
+collectTerminals = S.fromList . filter isSymbT . concatMap _rhs . S.toList
 
 -- | Collect all non-terminal symbols from a set of rules.
 --
 -- TODO move to FormalGrammars library
 
 collectNonTerminals :: S.Set Rule -> S.Set Symb
-collectNonTerminals = S.fromList . filter nSymb . concatMap (\r -> r^.lhs : r^.rhs) . S.toList
+collectNonTerminals = S.fromList . filter isSymbN . concatMap (\r -> r^.lhs : r^.rhs) . S.toList
 
 collectEpsilons :: S.Set Rule -> S.Set TN
 collectEpsilons = S.fromList
-                . filter (\case (E _) -> True ; z -> False)
+                . filter (\case E -> True ; z -> False)
                 . concatMap (view symb)
                 . concatMap _rhs
                 . S.toList
 
 genEps :: Symb -> [TN]
-genEps s = replicate (length $ s^.symb) eps
+genEps s = replicate (length $ s^.symb) E
 

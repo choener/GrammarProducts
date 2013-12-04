@@ -49,18 +49,18 @@ instance Monoid CNF where
 
 chomskyCombine :: Rule -> Rule -> [Rule]
 chomskyCombine (Rule l f rs) (Rule a g bs)
-  | [r] <- rs, [b] <- bs, tSymb r, tSymb b
+  | [r] <- rs, [b] <- bs, isSymbT r, isSymbT b
   = [Rule (Symb $ l^.symb ++ a^.symb) [] {- (f++g) -} [Symb $ r^.symb ++ b^.symb]]
-  | [r1,r2] <- rs, [b1,b2] <- bs, nSymb r1, nSymb r2, nSymb b1, nSymb b2
+  | [r1,r2] <- rs, [b1,b2] <- bs, isSymbN r1, isSymbN r2, isSymbN b1, isSymbN b2
   = [Rule (Symb $ l^.symb ++ a^.symb) [] {- (f++g) -} [Symb $ r1^.symb ++ b1^.symb, Symb $ r2^.symb ++ b2^.symb]]
-  | [r] <- rs, [b1,b2] <- bs, tSymb r, nSymb b1, nSymb b2
+  | [r] <- rs, [b1,b2] <- bs, isSymbT r, isSymbN b1, isSymbN b2
   = let (z1,zs1) = symbToRules r b1
         (z2,zs2) = symbToRules r b2
     in  zs1 ++ zs2 ++ {-concatMap (extendRederive (length $ l^.symb) (length $ a^.symb))-}
         [ Rule (Symb $ l^.symb ++ a^.symb) [] {- (f++g) -} [ {- Symb $ r^.symb  ++ b1^.symb -} z1 , Symb $ genEps r ++ b2^.symb]
         , Rule (Symb $ l^.symb ++ a^.symb) [] {- (f++g) -} [Symb $ genEps r ++ b1^.symb, z2 {- Symb $ r^.symb  ++ b2^.symb -} ]
         ]
-  | [r1,r2] <- rs, [b] <- bs, nSymb r1, nSymb r2, tSymb b
+  | [r1,r2] <- rs, [b] <- bs, isSymbN r1, isSymbN r2, isSymbT b
   = let (z1,zs1) = symbToRules r1 b
         (z2,zs2) = symbToRules r2 b
     in  zs1 ++ zs2 ++ {-concatMap (extendRederive (length $ l^.symb) (length $ a^.symb))-}
@@ -133,11 +133,11 @@ genNewSymbols α β x = (newN, epsN, trmN, epsT) where
 
 symbToRules :: Symb -> Symb -> (Symb, [Rule])
 symbToRules u' l'
-  | nSymb u' && tSymb l' = go u' l'
-  | tSymb u' && nSymb l' = let (s,rs) = go (over symb reverse l') (over symb reverse u')
-                           in  ( over symb reverse s
-                               , map (\(Rule l [] rs) -> Rule (over symb reverse l) [] (map (over symb reverse) rs)) rs
-                               )
+  | isSymbN u' && isSymbT l' = go u' l'
+  | isSymbT u' && isSymbN l' = let (s,rs) = go (over symb reverse l') (over symb reverse u')
+                             in  ( over symb reverse s
+                                 , map (\(Rule l [] rs) -> Rule (over symb reverse l) [] (map (over symb reverse) rs)) rs
+                                 )
   | otherwise            = error $ "incompatible upper/lower: " ++ show (u',l')
   where
     -- in 'n' we have the partial non-terminal, in 't' the partial terminal
