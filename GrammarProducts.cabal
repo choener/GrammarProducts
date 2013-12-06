@@ -13,22 +13,36 @@ cabal-version:  >= 1.6.0
 synopsis:
                 Grammar products and higher-dimensional grammars
 description:
-                This library provides the framework for the automatic
-                generation of complex grammars from more simple building
-                blocks. Internally, grammars are written using ADPfusion
-                operations and yield efficient code.
+                An algebra of liner and context-free grammars.
                 .
-                We provide a library with a parser for grammatical constructs.
-                Parsed grammars can be combined in several ways and transformed
-                into ADPfusion constructs which yield efficient implementations
-                of the combined grammars. Alternatively, such combined grammars
-                may be pretty-printed using the "GrammarProducts" executable.
+                This library provides the implementation of our theory of
+                algebraic operations over linear and context-free grammars.
+                Using algebraic operations, it is possible to construct complex
+                dynamic programming algorithms from simpler "atomic" grammars.
                 .
-                Grammar attributes, or algebras, are /not/ handled. They 
+                Our most important contribution is the definition of a product
+                of grammars which naturally leads to alignment-like algorithms
+                on multiple tapes.
+                .
+                An efficient implementation of the resulting grammars is
+                possible via the ADPfusion framework. The @FormalGrammars@
+                library provides the required "Template Haskell" machinary.
+                .
+                Alternatively, the resulting grammars can also be
+                pretty-printed in various ways (LaTeX, ANSI, Haskell module
+                with signature and grammar).
                 .
                 .
                 .
-                Formal background can be found in:
+                Formal background can be found in two papers:
+                .
+                .
+                Christian Höner zu Siederdissen, Ivo L. Hofacker, and Peter F. Stadler
+                .
+                Product Grammars for Alignment and Folding
+                .
+                submitted
+                .
                 .
                 .
                 Christian Höner zu Siederdissen, Ivo L. Hofacker, and Peter F. Stadler
@@ -42,41 +56,25 @@ description:
 
 
 Extra-Source-Files:
-
-
+  changelog
 
 library
   build-depends:
-    base >= 4 && < 5,
---    algebra,
-    ansi-wl-pprint ,
-    bytestring ,
-    containers ,
-    data-default,
---    ghc-prim ,
---    haskell-src ,
---    haskell-src-exts,
---    haskell-src-meta,
-    HaTeX,
-    lens ,
---    nats,
-    newtype,
-    parsers,
---    primitive      >= 0.5     ,
---    repa,
-    semigroups ,
-    transformers ,
---    template-haskell          ,
---    text,
---    th-build,
---    transformers,
-    trifecta ,
---    tuple-th,
---    unordered-containers,
---    vector         >= 0.10
+    base >= 4 && < 5          ,
     ADPfusion      >= 0.2.0   ,
+    ansi-wl-pprint            ,
+    bytestring                ,
+    containers                ,
+    data-default              ,
     FormalGrammars >= 0.0.0.1 ,
-    PrimitiveArray >= 0.5.1.0
+    HaTeX                     ,
+    lens                      ,
+    newtype                   ,
+    parsers                   ,
+    PrimitiveArray >= 0.5.1.0 ,
+    semigroups                ,
+    transformers              ,
+    trifecta
   exposed-modules:
     FormalLanguage.GrammarProduct
     FormalLanguage.GrammarProduct.Op.Add
@@ -97,6 +95,7 @@ library
 --    BioInf.GrammarProducts.Tools
 --    BioInf.GrammarProducts.TH
   ghc-options:
+    -O2
 
 -- With grammar products, we need a refined way of turning input source files
 -- into LaTeX and Haskell modules.
@@ -106,8 +105,8 @@ executable GrammarProductPP
     cmdargs == 0.10.*
   main-is:
     GramProd.hs
-
-
+  ghc-options:
+    -O2
 
 source-repository head
   type: git
