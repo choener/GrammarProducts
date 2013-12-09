@@ -5,7 +5,7 @@ module FormalLanguage.GrammarProduct.Op.Common where
 import qualified Data.Set as S
 import Control.Lens
 
-import FormalLanguage.Grammar
+import FormalLanguage.CFG.Grammar
 
 
 

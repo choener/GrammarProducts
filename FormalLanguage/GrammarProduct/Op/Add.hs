@@ -11,7 +11,7 @@ import Data.Semigroup
 import qualified Data.Set as S
 import Text.Printf
 
-import FormalLanguage.Grammar
+import FormalLanguage.CFG.Grammar
 
 
 

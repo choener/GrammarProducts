@@ -15,7 +15,7 @@ module FormalLanguage.GrammarProduct
 
 import Data.Monoid
 
-import FormalLanguage.Grammar
+import FormalLanguage.CFG.Grammar
 
 import FormalLanguage.GrammarProduct.Op.Greibach as Greibach
 import FormalLanguage.GrammarProduct.Op.Chomsky  as Chomsky

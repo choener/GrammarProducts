@@ -23,10 +23,10 @@ import           Control.Monad.Trans.State.Strict
 import           Data.Default
 import           Text.Trifecta.Delta
 
-import FormalLanguage.Grammar
-import FormalLanguage.Grammar.PrettyPrint.ANSI
-import FormalLanguage.Grammar.PrettyPrint.LaTeX
-import FormalLanguage.Parser
+import FormalLanguage.CFG.Grammar
+import FormalLanguage.CFG.PrettyPrint.ANSI
+import FormalLanguage.CFG.PrettyPrint.LaTeX
+import FormalLanguage.CFG.Parser
 
 import FormalLanguage.GrammarProduct.Op.Greibach
 import FormalLanguage.GrammarProduct.Op.Common

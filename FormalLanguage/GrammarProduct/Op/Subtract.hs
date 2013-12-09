@@ -10,7 +10,7 @@ import qualified Data.Set as S
 import Data.List (genericReplicate)
 import Text.Printf
 
-import FormalLanguage.Grammar
+import FormalLanguage.CFG.Grammar
 
 import FormalLanguage.GrammarProduct.Op.Common
 

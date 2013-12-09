@@ -15,7 +15,7 @@ import qualified Data.Set as S
 import Data.List (groupBy)
 import Data.Function (on)
 
-import FormalLanguage.Grammar
+import FormalLanguage.CFG.Grammar
 
 import FormalLanguage.GrammarProduct.Op.Common
 

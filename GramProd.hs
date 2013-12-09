@@ -25,10 +25,10 @@ import Text.Printf
 import Text.Trifecta
 import Text.Trifecta.Delta
 
-import FormalLanguage.Grammar
-import FormalLanguage.Grammar.PrettyPrint.ANSI
-import FormalLanguage.Grammar.PrettyPrint.LaTeX
-import FormalLanguage.Grammar.PrettyPrint.Haskell
+import FormalLanguage.CFG.Grammar
+import FormalLanguage.CFG.PrettyPrint.ANSI
+import FormalLanguage.CFG.PrettyPrint.LaTeX
+import FormalLanguage.CFG.PrettyPrint.Haskell
 import FormalLanguage.GrammarProduct.Parser
 
 

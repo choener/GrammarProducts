@@ -17,9 +17,9 @@ import qualified Data.Set as S
 import Text.Printf
 import System.IO.Unsafe
 
-import FormalLanguage.Grammar
-import FormalLanguage.Parser
-import FormalLanguage.Grammar.PrettyPrint.ANSI
+import FormalLanguage.CFG.Grammar
+import FormalLanguage.CFG.Parser
+import FormalLanguage.CFG.PrettyPrint.ANSI
 
 import FormalLanguage.GrammarProduct.Op.Common
 

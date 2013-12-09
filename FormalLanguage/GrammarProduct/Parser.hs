@@ -41,8 +41,8 @@ import qualified Control.Newtype as T
 import Prelude hiding (subtract)
 import Control.Monad
 
-import FormalLanguage.Grammar
-import FormalLanguage.Parser
+import FormalLanguage.CFG.Grammar
+import FormalLanguage.CFG.Parser
 
 import FormalLanguage.GrammarProduct
 

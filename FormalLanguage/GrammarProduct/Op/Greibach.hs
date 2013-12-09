@@ -21,8 +21,8 @@ import           Control.Monad.Trans.State.Strict
 import           Data.Default
 import           Text.Trifecta.Delta
 
-import FormalLanguage.Grammar
-import FormalLanguage.Parser
+import FormalLanguage.CFG.Grammar
+import FormalLanguage.CFG.Parser
 
 import FormalLanguage.GrammarProduct.Op.Common
 
