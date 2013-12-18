@@ -1,10 +1,10 @@
 name:           GrammarProducts
-version:        0.0.0.2
+version:        0.0.0.3
 author:         Christian Hoener zu Siederdissen, 2013
 copyright:      Christian Hoener zu Siederdissen, Ivo L. Hofacker, Peter F. Stadler, 2013
-homepage:       http://www.tbi.univie.ac.at/~choener/
+homepage:       http://www.tbi.univie.ac.at/~choener/gramprod
 maintainer:     choener@tbi.univie.ac.at
-category:       Bioinformatics
+category:       Formal Languages, Bioinformatics
 license:        GPL-3
 license-file:   LICENSE
 build-type:     Simple
@@ -36,22 +36,20 @@ description:
                 .
                 Formal background can be found in two papers:
                 .
-                .
+                @
                 Christian Höner zu Siederdissen, Ivo L. Hofacker, and Peter F. Stadler
-                .
                 Product Grammars for Alignment and Folding
-                .
                 submitted
+                @
                 .
+                and
                 .
-                .
+                @
                 Christian Höner zu Siederdissen, Ivo L. Hofacker, and Peter F. Stadler
-                .
                 How to Multiply Dynamic Programming Algorithms
-                .
                 Brazilian Symposium on Bioinformatics (BSB 2013)
-                .
                 Lecture Notes in Bioinformatics 8213, Springer, Heidelberg
+                @
 
 
 
