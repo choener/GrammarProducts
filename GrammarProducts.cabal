@@ -1,5 +1,5 @@
 name:           GrammarProducts
-version:        0.0.0.3
+version:        0.0.0.4
 author:         Christian Hoener zu Siederdissen, 2013
 copyright:      Christian Hoener zu Siederdissen, Ivo L. Hofacker, Peter F. Stadler, 2013
 homepage:       http://www.tbi.univie.ac.at/~choener/gramprod
@@ -64,7 +64,7 @@ library
     bytestring                ,
     containers                ,
     data-default              ,
-    FormalGrammars >= 0.0.0.1 ,
+    FormalGrammars >= 0.0.0.2 ,
     HaTeX                     ,
     lens                      ,
     newtype                   ,
