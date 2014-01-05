@@ -93,7 +93,7 @@ chomskyCombine (Rule l f rs) (Rule a g bs)
       printDoc $ rulesDoc $ S.singleton $ Rule l f rs
       printDoc $ rulesDoc $ S.singleton $ Rule a g bs
       fail "cannot handle (rule is not CNF):"
-  -- | otherwise = error $ "cannot handle (rule is not CNF): " ++ show (printDoc $ rulesDoc $ S.singleton $ Rule l f rs, Rule a g bs)
+  -- \| otherwise = error $ "cannot handle (rule is not CNF): " ++ show (printDoc $ rulesDoc $ S.singleton $ Rule l f rs, Rule a g bs)
 
 {-
 -- | Extend mixed rules and rederive CNF
@@ -125,11 +125,11 @@ genNewSymbols α β x = (newN, epsN, trmN, epsT) where
   -- the new non-terminal for the terminal symbol, with terms replaced by non-term symbols
   -- TODO we can't just replace all N here with eps, tome could have been created from other prods.
   trmN = Symb . map (\case (T s) -> N ("T"++s) Singular ; N _ _ -> eps; z -> z) $ x^.symb
-  -- finally the terminal 
+  -- finally the terminal
   epsT = Symb . map (\case (N _ _) -> eps               ; z -> z) $ x^.symb
 -}
 
--- | 
+-- |
 
 symbToRules :: Symb -> Symb -> (Symb, [Rule])
 symbToRules u' l'
@@ -154,4 +154,3 @@ symbToRules u' l'
 
 genTermStar :: Symb -> [TN]
 genTermStar s = map (\case (T s) -> N ("S"++s) Singular ; z -> z) $ s^.symb
-
