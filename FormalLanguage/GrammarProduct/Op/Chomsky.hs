@@ -93,7 +93,7 @@ chomskyCombine (Rule l f rs) (Rule a g bs)
       printDoc $ rulesDoc $ S.singleton $ Rule l f rs
       printDoc $ rulesDoc $ S.singleton $ Rule a g bs
       fail "cannot handle (rule is not CNF):"
-  -- | otherwise = error $ "cannot handle (rule is not CNF): " ++ show (printDoc $ rulesDoc $ S.singleton $ Rule l f rs, Rule a g bs)
+  -- \| otherwise = error $ "cannot handle (rule is not CNF): " ++ show (printDoc $ rulesDoc $ S.singleton $ Rule l f rs, Rule a g bs)
 
 {-
 -- | Extend mixed rules and rederive CNF
