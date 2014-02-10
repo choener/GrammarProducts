@@ -1,7 +1,7 @@
 name:           GrammarProducts
-version:        0.0.0.4
-author:         Christian Hoener zu Siederdissen, 2013
-copyright:      Christian Hoener zu Siederdissen, Ivo L. Hofacker, Peter F. Stadler, 2013
+version:        0.0.0.5
+author:         Christian Hoener zu Siederdissen, 2013-2014
+copyright:      Christian Hoener zu Siederdissen, Ivo L. Hofacker, Peter F. Stadler, 2013-2014
 homepage:       http://www.tbi.univie.ac.at/~choener/gramprod
 maintainer:     choener@tbi.univie.ac.at
 category:       Formal Languages, Bioinformatics
@@ -50,6 +50,7 @@ description:
                 Brazilian Symposium on Bioinformatics (BSB 2013)
                 Lecture Notes in Bioinformatics 8213, Springer, Heidelberg
                 @
+                .
 
 
 
@@ -59,20 +60,20 @@ Extra-Source-Files:
 library
   build-depends:
     base >= 4 && < 5          ,
-    ADPfusion      >= 0.2.0   ,
-    ansi-wl-pprint            ,
-    bytestring                ,
+    ADPfusion      >= 0.3.0   ,
+    ansi-wl-pprint >= 0.6     ,
+    bytestring     >= 0.10    ,
     containers                ,
-    data-default              ,
-    FormalGrammars >= 0.0.0.2 ,
+    data-default   >= 0.5     ,
+    FormalGrammars >= 0.0.0.3 ,
     HaTeX                     ,
-    lens                      ,
+    lens           >= 4.0     ,
     newtype                   ,
-    parsers                   ,
-    PrimitiveArray >= 0.5.1.0 ,
+    parsers        >= 0.9     ,
+    PrimitiveArray >= 0.5.4.0 ,
     semigroups                ,
     transformers              ,
-    trifecta
+    trifecta       >= 1.2
   exposed-modules:
     FormalLanguage.GrammarProduct
     FormalLanguage.GrammarProduct.Op.Add
@@ -85,13 +86,6 @@ library
     FormalLanguage.GrammarProduct.Op.Power
     FormalLanguage.GrammarProduct.Op.Subtract
     FormalLanguage.GrammarProduct.Parser
---    BioInf.GrammarProducts
---    BioInf.GrammarProducts.Grammar
---    BioInf.GrammarProducts.Haskell
---    BioInf.GrammarProducts.Helper
---    BioInf.GrammarProducts.LaTeX
---    BioInf.GrammarProducts.Tools
---    BioInf.GrammarProducts.TH
   ghc-options:
     -O2
 
