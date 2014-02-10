@@ -1,3 +1,4 @@
+{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE StandaloneDeriving #-}
 {-# LANGUAGE RankNTypes #-}
@@ -40,6 +41,8 @@ import qualified Control.Newtype as T
 --import Numeric.Natural.Internal
 import Prelude hiding (subtract)
 import Control.Monad
+import Data.Char (isUpper)
+import Data.Data.Lens
 
 import FormalLanguage.CFG.Grammar
 import FormalLanguage.CFG.Parser
@@ -69,9 +72,32 @@ productParser = go [] <* eof where
 grammarProduct gs = do
   reserveGI "Product:"
   n <- identGI
+  r <- option Nothing $ Just <$> braces renameSymbols
   e <- getGrammar <$> expr (M.fromList [(g^.name,g) | g<-gs])
   reserveGI "//"
-  return $ over (name) (const n) e
+  return $ over (name) (const n) $ transformRenamed r e
+
+transformRenamed Nothing  e = e
+transformRenamed (Just r) e = go r e where
+  go []     e = e
+  go (RTN   f t:rs) e = go rs (e & tinplate %~ repTN   f t)
+  go (RSymb f t:rs) e = go rs (e & tinplate %~ repSymb f t)
+  repTN :: String -> String -> TN -> TN
+  repTN f t r | r^.tnName == f = set tnName t r
+  repTN _ _ r                  = r
+  repSymb :: [String] -> [String] -> Symb -> Symb
+  repSymb f t r | r^..symb.folded.tnName == f = Symb . map fixTN . zipWith (set tnName) t $ getSymbs r
+  repSymb _ _ r = r
+  fixTN r | r^.tnName == "ε" = E
+  fixTN r = r
+
+data Rename
+  = RTN   String String -- one-dim term / non-term
+  | RSymb [String] [String] -- multi-dim symbol
+
+renameSymbols = (rtn <|> rsymb) `sepBy` (symbol ",") where
+  rtn   = RTN   <$> identGI <* string "->" <*> identGI
+  rsymb = RSymb <$> (brackets $ identGI `sepBy` comma) <* string "->" <*> (brackets $ identGI `sepBy` comma)
 
 expr :: Map String Grammar -> Parse ExprGrammar
 expr g = e where

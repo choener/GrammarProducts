@@ -44,7 +44,7 @@ instance Semigroup (Add Grammar) where
                 (Nothing, Nothing) -> Nothing
                 (Nothing, Just k ) -> Just k
                 (Just k , Nothing) -> Just k
-                (Just k , Just l ) -> if k==l then Just k else error "need to create new symbol, see note on Semigroup (Add Grammar)"
+                (Just k , Just l ) -> if k==l then Just k else error "need to create new start symbol, see note on Semigroup (Add Grammar)"
           t = case (l^.start,r^.start) of
                 (Just k , Just l ) -> if k==l then S.empty else error "this will create the new rule"
                 _                  -> S.empty
