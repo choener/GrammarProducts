@@ -9,6 +9,8 @@
 
 -- | This parser extends the @FormalLanguage.Parser@ parser of single- and
 -- multi-dim grammars to accept grammar product definitions as well.
+--
+-- TODO display function names like this: <fun,fun,fun>
 
 module FormalLanguage.GrammarProduct.Parser where
 
@@ -80,8 +82,10 @@ grammarProduct gs = do
 transformRenamed Nothing  e = e
 transformRenamed (Just r) e = go r e where
   go []     e = e
-  go (RTN   f t:rs) e = go rs (e & tinplate %~ repTN   f t)
-  go (RSymb f t:rs) e = go rs (e & tinplate %~ repSymb f t)
+  go (RTN    f t:rs) e = go rs (e & tinplate %~ repTN   f t)
+  go (RSymb  f t:rs) e = go rs (e & tinplate %~ repSymb f t)
+  go (RFun   f t:rs) e = go rs (e & tinplate %~ repFun  f t)
+  go (RStart s  :rs) e = go rs (repStart s e)
   repTN :: String -> String -> TN -> TN
   repTN f t r | r^.tnName == f = set tnName t r
   repTN _ _ r                  = r
@@ -90,14 +94,22 @@ transformRenamed (Just r) e = go r e where
   repSymb _ _ r = r
   fixTN r | r^.tnName == "ε" = E
   fixTN r = r
+  repFun  f t r | r^.fun == f = set fun t r
+  repFun  _ _ r               = r
+  repStart [] e = set start Nothing         e
+  repStart s  e = set start (Just . Symb . map (\z -> N z Singular) $ s) e
 
 data Rename
-  = RTN   String String -- one-dim term / non-term
-  | RSymb [String] [String] -- multi-dim symbol
+  = RTN    String String -- one-dim term / non-term
+  | RSymb  [String] [String] -- multi-dim symbol
+  | RFun   [String] [String] -- replace function names
+  | RStart [String] -- set or delete a start symbol
 
-renameSymbols = (rtn <|> rsymb) `sepBy` (symbol ",") where
-  rtn   = RTN   <$> identGI <* string "->" <*> identGI
-  rsymb = RSymb <$> (brackets $ identGI `sepBy` comma) <* string "->" <*> (brackets $ identGI `sepBy` comma)
+renameSymbols = (try rtn <|> rsymb <|> rfun <|> rstart) `sepBy` (symbol ",") where
+  rtn    = RTN    <$> identGI <* string "->" <*> identGI
+  rsymb  = RSymb  <$> (brackets $ identGI `sepBy` comma) <* string "->" <*> (brackets $ identGI `sepBy` comma)
+  rfun   = RFun   <$> (angles   $ identGI `sepBy` comma) <* string "->" <*> (angles   $ identGI `sepBy` comma)
+  rstart = RStart <$ string "S:" <*> (brackets $ identGI `sepBy` comma)
 
 expr :: Map String Grammar -> Parse ExprGrammar
 expr g = e where
