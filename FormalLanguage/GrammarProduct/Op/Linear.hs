@@ -64,6 +64,7 @@ mergeRHS ls' rs' = concat $ go (groupRHS ls') (groupRHS rs') where
     | all isSymbN l = go [l] []  ++ go ls     (r:rs)
     | all isSymbN r = go []  [r] ++ go (l:ls) rs
     | otherwise     = go [l] []  ++ go [] [r] ++ go ls rs
+  go ls rs          = error $ "unhandled (Lib-FormalLanguage, FormalLanguage.GrammarProduct.Op.Linear): " ++ show (ls,rs)
   goT []            []            = []
   goT []            (Symb t : rs) = Symb (genEps dl ++ t) : goT [] rs
   goT (Symb t : ls) []            = Symb (t ++ genEps dr) : goT ls []
