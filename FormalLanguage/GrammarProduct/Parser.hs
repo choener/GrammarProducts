@@ -49,7 +49,7 @@ import Data.Data.Lens
 import FormalLanguage.CFG.Grammar
 import FormalLanguage.CFG.Parser
 
-import FormalLanguage.GrammarProduct
+import FormalLanguage.GrammarProduct.Op
 
 
 
