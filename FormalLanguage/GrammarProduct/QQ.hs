@@ -42,11 +42,6 @@ parseGrammarProduct s = do
     (Success g') -> do
       let g = reverse g'
       runIO . mapM_ (printDoc . grammarDoc) $ g
-      runIO $ print "TESTING BELOW"
-      runIO $ print $ (last g)
-      runIO $ print "TESTING "
       zs <- newGen $ last g
---      runIO $ print zs
-      runIO $ print "TESTING ABOVE"
-      return zs -- [gSig,gGra]
+      return zs
 

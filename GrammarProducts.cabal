@@ -84,6 +84,7 @@ library
     vector            >= 0.10.9
   exposed-modules:
     FormalLanguage.GrammarProduct
+    FormalLanguage.GrammarProduct.Op
     FormalLanguage.GrammarProduct.Op.Add
     FormalLanguage.GrammarProduct.Op.Chomsky
     FormalLanguage.GrammarProduct.Op.Chomsky.Proof
