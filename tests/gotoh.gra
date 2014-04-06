@@ -11,8 +11,10 @@ D -> dcn <<< D
 Grammar: DD
 N: M
 N: D
+N: S
 D -> dbg <<< M
 D -> dcn <<< D
+S -> sta <<< D
 //
 
 Grammar: MD
@@ -30,7 +32,13 @@ T: e
 M -> don <<< e
 //
 
-Product: Gotoh {S:[M,M]}
-MMDD >< MMDD  -  DD >< DD  -  MD >< MD  +  X >< X
+Grammar: S
+N: S
+S -> sta <<< M
+S -> sta <<< D
+//
+
+Product: Gotoh {S:[S,S]}
+MMDD >< MMDD  -  MD >< MD  +  X >< X  +  S >< S  -  DD >< DD
 //
 
