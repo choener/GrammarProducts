@@ -1,0 +1,36 @@
+Grammar: MMDD
+N: M
+N: D
+T: a
+M -> mat <<< M a
+M -> mat <<< D a
+D -> dbg <<< M
+D -> dcn <<< D
+//
+
+Grammar: DD
+N: M
+N: D
+D -> dbg <<< M
+D -> dcn <<< D
+//
+
+Grammar: MD
+N: M
+N: D
+T: a
+M -> mat <<< D a
+D -> dbg <<< D
+D -> dcn <<< D
+//
+
+Grammar: X
+N: M
+T: e
+M -> don <<< e
+//
+
+Product: Gotoh {S:[M,M]}
+MMDD >< MMDD  -  DD >< DD  -  MD >< MD  +  X >< X
+//
+
