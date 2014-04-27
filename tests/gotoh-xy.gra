@@ -42,7 +42,3 @@ Product: Gotoh {S:[S,S]}
 G >< G  +  S >< S  -  V >< V  -  W >< W  +  N >< N
 //
 
-Product: Gotoh3 {S:[S,S,S]}
-G >< G >< G  +  S >< S >< S  -  V >< V >< V  -  W >< W >< W  +  N >< N >< N
-//
-
