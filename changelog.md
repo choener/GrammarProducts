@@ -1,3 +1,8 @@
+0.0.1.0
+-------
+
+- fixed dependencies
+
 0.0.0.5
 -------
 
@@ -6,9 +11,9 @@
 0.0.0.4
 -------
 
-Version bump for new TH stuff
+- Version bump for new TH stuff
 
 0.0.0.3
 -------
 
-Products of linear and context-free grammars
+- Products of linear and context-free grammars
