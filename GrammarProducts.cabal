@@ -1,5 +1,5 @@
 name:           GrammarProducts
-version:        0.0.1.0
+version:        0.1.0.0
 author:         Christian Hoener zu Siederdissen, 2013-2014
 copyright:      Christian Hoener zu Siederdissen, Ivo L. Hofacker, Peter F. Stadler, 2013-2014
 homepage:       http://www.tbi.univie.ac.at/~choener/gramprod
@@ -39,7 +39,7 @@ description:
                 @
                 Christian Höner zu Siederdissen, Ivo L. Hofacker, and Peter F. Stadler
                 Product Grammars for Alignment and Folding
-                submitted
+                IEEE/ACM Transactions on Computational Biology and Bioinformatics (TCBB) (accepted)
                 @
                 .
                 and
@@ -60,6 +60,7 @@ Extra-Source-Files:
 flag examples
   description: build the examples (only Needleman-Wunsch for now)
   default: False
+  manual: True
 
 library
   build-depends:
@@ -67,7 +68,7 @@ library
     bytestring        == 0.10.*   ,
     containers                    ,
     data-default      == 0.5.*    ,
-    FormalGrammars    == 0.0.1.*  ,
+    FormalGrammars    == 0.1.*    ,
     lens              == 4.*      ,
     newtype           == 0.2.*    ,
     parsers           == 0.11.*   ,
@@ -110,7 +111,7 @@ executable AlignGlobal
   if flag(examples)
     build-depends:
       ADPfusion       == 0.3.*    ,
-      PrimitiveArray  == 0.5.5.*  ,
+      PrimitiveArray  == 0.6.*    ,
       repa            == 3.2.*    ,
       vector          == 0.10.*   ,
       base            == 4.*
