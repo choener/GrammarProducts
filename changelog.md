@@ -2,6 +2,7 @@
 
 - major version bump
 - updated dependencies
+- using ADPfusion 0.3 now
 
 0.0.1.0
 -------

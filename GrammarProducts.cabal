@@ -9,7 +9,7 @@ license:        GPL-3
 license-file:   LICENSE
 build-type:     Simple
 stability:      experimental
-cabal-version:  >= 1.6.0
+cabal-version:  >= 1.8.0
 synopsis:
                 Grammar products and higher-dimensional grammars
 description:
@@ -71,11 +71,11 @@ library
     FormalGrammars    == 0.1.*    ,
     lens              == 4.*      ,
     newtype           == 0.2.*    ,
-    parsers           == 0.11.*   ,
-    semigroups        == 0.14     ,
+    parsers           == 0.12.*   ,
+    semigroups        == 0.15.*   ,
     template-haskell              ,
-    transformers      == 0.3.*    ,
-    trifecta          == 1.4.*    ,
+    transformers      == 0.4.*    ,
+    trifecta          == 1.5.*    ,
     base              == 4.*
   exposed-modules:
     FormalLanguage.GrammarProduct
@@ -99,9 +99,12 @@ library
 
 executable GrammarProductPP
   build-depends:
+    GrammarProducts   ,
     HaTeX   == 3.13.* ,
     cmdargs == 0.10.* ,
     base    == 4.*
+  hs-source-dirs:
+    src
   main-is:
     GramProd.hs
   ghc-options:
@@ -110,16 +113,18 @@ executable GrammarProductPP
 executable AlignGlobal
   if flag(examples)
     build-depends:
+      GrammarProducts             ,
       ADPfusion       == 0.3.*    ,
       PrimitiveArray  == 0.6.*    ,
-      repa            == 3.2.*    ,
       vector          == 0.10.*   ,
       base            == 4.*
     buildable: True
   else
     buildable: False
+  hs-source-dirs:
+    src
   main-is:
-    FormalLanguage/GrammarProduct/Examples/AlignGlobal.hs
+    AlignGlobal.hs
   ghc-options:
     -Odph
     -fcpr-off
