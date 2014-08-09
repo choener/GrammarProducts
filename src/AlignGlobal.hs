@@ -10,7 +10,6 @@ module Main where
 import           Control.Applicative
 import           Control.Monad
 import           Control.Monad.ST
-import           Data.Array.Repa.Index
 import           Data.Char (toUpper,toLower)
 import           Data.List
 import           Data.Vector.Fusion.Util
@@ -84,9 +83,17 @@ forward as bs = do
   let aa = chr as
   let bb = chr bs
   !t' <- PA.newWithM (Z:.pointL 0 0:.pointL 0 0) (Z:.pointL 0 aL:.pointL 0 bL) (-999999)
-  let t = mTblD (Z:.EmptyOk:.EmptyOk) t'
+  let t = MTbl (Z:.EmptyOk:.EmptyOk) t'
   runFreezeMTbls $ gGlobal score t aa bb Empty Empty
 {-# NOINLINE forward #-}
+
+backtrack :: VU.Vector Char -> VU.Vector Char -> Arrs -> [[String]]
+backtrack as bs (Z:.t') = map (map reverse) . unId . SM.toList . unId $ axiom g where
+  aa = chr as
+  bb = chr bs
+  t = BtTbl (Z:.EmptyOk:.EmptyOk) t'
+  (Z:.g) = gGlobal (score <** pretty) t aa bb Empty Empty
+{-# NOINLINE backtrack #-}
 
 runGlobal :: Int -> String -> String -> (Int,[[String]])
 runGlobal k as bs = (t PA.! (Z:.pointL 0 aL:.pointL 0 bL), take k b) where
@@ -109,14 +116,4 @@ main = do
         forM_ ys $ \[y1,y2] -> printf "%s %5d\n%s\n" y1 k y2
         eats xs
   eats ls
-
-backtrack :: VU.Vector Char -> VU.Vector Char -> Arrs -> [[String]]
-backtrack as bs (Z:.t') = map (map reverse) . unId . SM.toList . unId . g $ Z:.pointL 0 aL:.pointL 0 bL where
-  aL = VU.length as
-  bL = VU.length bs
-  aa = chr as
-  bb = chr bs
-  t = btTblD (Z:.EmptyOk:.EmptyOk) t' g
-  (Z:.(_,g)) = gGlobal (score <** pretty) t aa bb Empty Empty
-{-# NOINLINE backtrack #-}
 

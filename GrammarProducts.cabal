@@ -99,10 +99,17 @@ library
 
 executable GrammarProductPP
   build-depends:
-    GrammarProducts   ,
-    HaTeX   == 3.13.* ,
-    cmdargs == 0.10.* ,
-    base    == 4.*
+    ansi-wl-pprint              ,
+    cmdargs           == 0.10.* ,
+    data-default                ,
+    FormalGrammars              ,
+    GrammarProducts             ,
+    HaTeX             == 3.13.* ,
+    lens                        ,
+    semigroups                  ,
+    transformers                ,
+    trifecta                    ,
+    base              == 4.*
   hs-source-dirs:
     src
   main-is:
@@ -113,11 +120,13 @@ executable GrammarProductPP
 executable AlignGlobal
   if flag(examples)
     build-depends:
-      GrammarProducts             ,
-      ADPfusion       == 0.3.*    ,
-      PrimitiveArray  == 0.6.*    ,
-      vector          == 0.10.*   ,
-      base            == 4.*
+      ADPfusion         == 0.3.*    ,
+      FormalGrammars                ,
+      GrammarProducts               ,
+      PrimitiveArray    == 0.6.*    ,
+      template-haskell              ,
+      vector            == 0.10.*   ,
+      base              == 4.*
     buildable: True
   else
     buildable: False

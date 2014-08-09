@@ -42,6 +42,6 @@ parseGrammarProduct s = do
     (Success g') -> do
       let g = reverse g'
       runIO . mapM_ (printDoc . grammarDoc) $ g
-      zs <- newGen $ last g
+      zs <- thCodeGen $ last g
       return zs
 
