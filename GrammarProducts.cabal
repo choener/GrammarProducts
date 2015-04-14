@@ -1,9 +1,9 @@
 name:           GrammarProducts
 version:        0.1.0.0
-author:         Christian Hoener zu Siederdissen, 2013-2014
-copyright:      Christian Hoener zu Siederdissen, Ivo L. Hofacker, Peter F. Stadler, 2013-2014
-homepage:       http://www.tbi.univie.ac.at/~choener/gramprod
-maintainer:     choener@tbi.univie.ac.at
+author:         Christian Hoener zu Siederdissen, 2013-2015
+copyright:      Christian Hoener zu Siederdissen, 2013-2015
+homepage:       http://www.bioinf.uni-leipzig.de/gADP/
+maintainer:     choener@bioinf.uni-leipzig.de
 category:       Formal Languages, Bioinformatics
 license:        GPL-3
 license-file:   LICENSE
@@ -63,20 +63,19 @@ flag examples
   manual: True
 
 library
-  build-depends:
-    ansi-wl-pprint    == 0.6.*    ,
-    bytestring        == 0.10.*   ,
-    containers                    ,
-    data-default      == 0.5.*    ,
-    FormalGrammars    == 0.1.*    ,
-    lens              == 4.*      ,
-    newtype           == 0.2.*    ,
-    parsers           == 0.12.*   ,
-    semigroups        == 0.15.*   ,
-    template-haskell              ,
-    transformers      == 0.4.*    ,
-    trifecta          == 1.5.*    ,
-    base              == 4.*
+  build-depends: base              >= 4.7   && < 4.9
+               , ansi-wl-pprint    >= 0.6
+               , bytestring        >= 0.10
+               , containers
+               , data-default      >= 0.5
+               , FormalGrammars    == 0.2.*
+               , lens              >= 4
+               , newtype           >= 0.2
+               , parsers           >= 0.12
+               , semigroups        >= 0.15
+               , template-haskell
+               , transformers      >= 0.4
+               , trifecta          >= 1.5
   exposed-modules:
     FormalLanguage.GrammarProduct
     FormalLanguage.GrammarProduct.Op
@@ -98,18 +97,17 @@ library
 -- into LaTeX and Haskell modules.
 
 executable GrammarProductPP
-  build-depends:
-    ansi-wl-pprint              ,
-    cmdargs           == 0.10.* ,
-    data-default                ,
-    FormalGrammars              ,
-    GrammarProducts             ,
-    HaTeX             == 3.13.* ,
-    lens                        ,
-    semigroups                  ,
-    transformers                ,
-    trifecta                    ,
-    base              == 4.*
+  build-depends: base              >= 4.7     && < 4.9
+               , ansi-wl-pprint
+               , cmdargs           == 0.10.*
+               , data-default
+               , FormalGrammars
+               , GrammarProducts
+               , HaTeX             >= 3.16
+               , lens
+               , semigroups
+               , transformers
+               , trifecta
   hs-source-dirs:
     src
   main-is:
