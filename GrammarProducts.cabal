@@ -118,7 +118,7 @@ executable GrammarProductPP
 executable AlignGlobal
   if flag(examples)
     build-depends:
-      ADPfusion         == 0.3.*    ,
+      ADPfusion         == 0.4.*    ,
       FormalGrammars                ,
       GrammarProducts               ,
       PrimitiveArray    == 0.6.*    ,
