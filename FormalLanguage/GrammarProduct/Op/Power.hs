@@ -16,6 +16,14 @@ import FormalLanguage.CFG.Grammar
 -- |
 
 power :: Grammar -> Integer -> Grammar
+power g k
+  | k < 1     = error $ "Op.Power.power: power " ++ show k ++ " < 1"
+  | otherwise = over (lens) (what) g
+  where kDim :: Symbol -> Symbol
+        kDim = undefined
+        kAttr :: AttributeFunction -> AttributeFunction
+        kAttr = undefined
+{-
 power g k = Grammar ts ns es rs s nm where
   ts = g^.tsyms
   ns = S.map go $ g^.nsyms
@@ -24,4 +32,5 @@ power g k = Grammar ts ns es rs s nm where
   s  = fmap go $ g^.start
   nm = concat . genericReplicate k $ g^.name
   go (Symb z) = Symb . concat $ genericReplicate k z
+-}
 
