@@ -9,7 +9,7 @@ license:        GPL-3
 license-file:   LICENSE
 build-type:     Simple
 stability:      experimental
-cabal-version:  >= 1.8.0
+cabal-version:  >= 1.10.0
 synopsis:
                 Grammar products and higher-dimensional grammars
 description:
@@ -63,19 +63,19 @@ flag examples
   manual: True
 
 library
-  build-depends: base              >= 4.7   && < 4.9
-               , ansi-wl-pprint    >= 0.6
-               , bytestring        >= 0.10
-               , containers
-               , data-default      >= 0.5
-               , FormalGrammars    == 0.2.*
-               , lens              >= 4
-               , newtype           >= 0.2
-               , parsers           >= 0.12
-               , semigroups        >= 0.15
-               , template-haskell
-               , transformers      >= 0.4
-               , trifecta          >= 1.5
+  build-depends: base               >= 4.7    && < 4.9
+               , ansi-wl-pprint     >= 0.6    && < 0.7
+               , bytestring         >= 0.10   && < 0.11
+               , containers         >= 0.5    && < 0.6
+               , data-default       >= 0.5    && < 0.6
+               , FormalGrammars     == 0.2.*
+               , lens               >= 4      && < 5
+               , newtype            >= 0.2    && < 0.3
+               , parsers            >= 0.12   && < 0.13
+               , semigroups         >= 0.15   && < 0.17
+               , template-haskell   >= 2      && < 3
+               , transformers       >= 0.4    && < 0.5
+               , trifecta           >= 1.5    && < 1.6
   exposed-modules:
     FormalLanguage.GrammarProduct
     FormalLanguage.GrammarProduct.Op
@@ -91,19 +91,23 @@ library
     FormalLanguage.GrammarProduct.Parser
     FormalLanguage.GrammarProduct.QQ
     FormalLanguage.GrammarProduct.TH
+  default-language:
+    Haskell2010
+  default-extensions:
   ghc-options:
+    -O2 -funbox-strict-fields
 
 -- With grammar products, we need a refined way of turning input source files
 -- into LaTeX and Haskell modules.
 
 executable GrammarProductPP
-  build-depends: base              >= 4.7     && < 4.9
+  build-depends: base             >= 4.7    && < 4.9
                , ansi-wl-pprint
-               , cmdargs           == 0.10.*
+               , cmdargs          >= 0.10   && < 0.11
                , data-default
                , FormalGrammars
                , GrammarProducts
-               , HaTeX             >= 3.16
+               , HaTeX            >= 3.16   && < 4
                , lens
                , semigroups
                , transformers
@@ -112,19 +116,21 @@ executable GrammarProductPP
     src
   main-is:
     GramProd.hs
+  default-language:
+    Haskell2010
+  default-extensions:
   ghc-options:
     -O2
 
 executable AlignGlobal
   if flag(examples)
-    build-depends:
-      ADPfusion         == 0.4.*    ,
-      FormalGrammars                ,
-      GrammarProducts               ,
-      PrimitiveArray    == 0.6.*    ,
-      template-haskell              ,
-      vector            == 0.10.*   ,
-      base              == 4.*
+    build-depends: base               >= 4.7 && < 4.9
+                 , ADPfusion          == 0.4.*
+                 , FormalGrammars
+                 , GrammarProducts
+                 , PrimitiveArray     == 0.6.*
+                 , template-haskell
+                 , vector             == 0.10.*
     buildable: True
   else
     buildable: False
@@ -132,14 +138,17 @@ executable AlignGlobal
     src
   main-is:
     AlignGlobal.hs
+  default-language:
+    Haskell2010
+  default-extensions:
   ghc-options:
-    -Odph
+    -O2
     -fcpr-off
     -funbox-strict-fields
     -funfolding-use-threshold1000
     -funfolding-keeness-factor1000
     -fllvm
-    -optlo-O3 -optlo-std-compile-opts
+    -optlo-O3
     -fllvm-tbaa
 
 source-repository head
