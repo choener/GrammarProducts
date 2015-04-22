@@ -28,6 +28,8 @@ import FormalLanguage.GrammarProduct.Op.Common
 
 
 
+{-
+
 -- * Proof of associativity of the 2-GNF.
 
 -- | Wrap a grammar in 2-GNF form.
@@ -131,5 +133,7 @@ aligned ls' rs' = go (groupBy ((==) `on` isSymbT) ls') (groupBy ((==) `on` isSym
     | length lls  > length rrs = undefined
   epsR ls = map (\(Symb s) -> Symb $ s ++ replicate dr (T "")) ls
   epsL rs = map (\(Symb s) -> Symb $ replicate dl (T "") ++ s) rs
+-}
+
 -}
 

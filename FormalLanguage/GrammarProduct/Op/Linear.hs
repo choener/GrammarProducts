@@ -1,4 +1,3 @@
-{-# LANGUAGE FlexibleInstances #-}
 
 -- | Direct product of two grammars.
 --
@@ -14,6 +13,7 @@ import Control.Applicative
 import qualified Data.Set as S
 import Data.List (groupBy)
 import Data.Function (on)
+import Data.Default
 
 import FormalLanguage.CFG.Grammar
 
@@ -21,27 +21,37 @@ import FormalLanguage.GrammarProduct.Op.Common
 
 
 
+directProduct l r = runLinear $ Linear l <> Linear r
+
 newtype Linear a = Linear {runLinear :: a}
 
 
 
 instance Semigroup (Linear Grammar) where
-  (Linear g) <> (Linear h) = Linear $ Grammar ts ns es rs s (g^.name <> h^.name) where
+  (Linear g) <> (Linear h) = Linear $ Grammar sv st tv io rs s p (g^.grammarName ++ h^.grammarName) False where -- ts ns es rs s (g^.name <> h^.name) where
+    sv = undefined
+    st = undefined
+    tv = undefined
+    io = undefined
+    rs = undefined
+    s  = undefined
+    p  = undefined
+    {-
     ts = g^.tsyms <> h^.tsyms
     ns = collectNonTerminals rs
-    es = g^.epsis <> h^.epsis
     rs = S.fromList [ direct l r | l <- g^..rules.folded, r <- h^..rules.folded ]
-    s  = liftA2 (\l r -> Symb $ l^.symb ++ r^.symb) (g^.start) (h^.start)
-    direct (Rule l f rs) (Rule a g bs) = Rule (Symb $ l^.symb ++ a^.symb) (f++g) (mergeRHS rs bs)
+    s  = liftA2 (<>) (g^.start) (h^.start)
+    direct (Rule l f rs) (Rule a g bs) = Rule (l <> a) (f++g) (mergeRHS rs bs)
+    -}
 
 instance Monoid (Linear Grammar) where
-  mempty = Linear $ Grammar S.empty S.empty S.empty (S.singleton $ Rule (Symb []) [] []) Nothing ""
+  mempty = Linear $ set rules (S.singleton $ Rule (Symbol []) [] []) def
   mappend = (<>)
 
 -- | Merges right-hand sides in a linear direct product. For full-fledged CFGs
 -- in different normal forms, see the GNF and CNF implementations.
 
-mergeRHS :: [Symb] -> [Symb] -> [Symb]
+mergeRHS :: [Symbol] -> [Symbol] -> [Symbol]
 mergeRHS [] rs = rs -- neutral element
 mergeRHS ls [] = ls -- neutral element
 mergeRHS ls' rs' = concat $ go (groupRHS ls') (groupRHS rs') where
@@ -49,26 +59,26 @@ mergeRHS ls' rs' = concat $ go (groupRHS ls') (groupRHS rs') where
   dr = head rs'
   go [] [] = []
   go [] (r:rs)
-    | all isSymbT r = map (\(Symb z) -> Symb $ genEps dl ++ z) r : go [] rs
-    | all isSymbN r = let [Symb z] = r
-                      in  [Symb $ genEps dl ++ z] : go [] rs
+    | all isTerminal  r = map (genDel dl <>) r : go [] rs
+    | all isSyntactic r = let [z] = r
+                          in  [genDel dl <> z] : go [] rs
   go (l:ls) []
-    | all isSymbT l = map (\(Symb z) -> Symb $ z ++ genEps dr) l : go ls []
-    | all isSymbN l = let [Symb z] = l
-                      in  [Symb $ z ++ genEps dr] : go ls []
+    | all isTerminal  l = map (<> genDel dr) l : go ls []
+    | all isSyntactic l = let [z] = l
+                          in  [z <> genDel dr] : go ls []
   go (l:ls) (r:rs)
-    | all isSymbT l && all isSymbT r = goT l r : go ls rs
-    | all isSymbN l && all isSymbN r = let [Symb y] = l
-                                           [Symb z] = r
-                                       in  [Symb $ y++z] : go ls rs
-    | all isSymbN l = go [l] []  ++ go ls     (r:rs)
-    | all isSymbN r = go []  [r] ++ go (l:ls) rs
+    | all isTerminal  l && all isTerminal  r = goT l r : go ls rs
+    | all isSyntactic l && all isSyntactic r = let [Symbol y] = l
+                                                   [Symbol z] = r
+                                               in  [Symbol $ y++z] : go ls rs
+    | all isSyntactic l = go [l] []  ++ go ls     (r:rs)
+    | all isSyntactic r = go []  [r] ++ go (l:ls) rs
     | otherwise     = go [l] []  ++ go [] [r] ++ go ls rs
   go ls rs          = error $ "unhandled (Lib-FormalLanguage, FormalLanguage.GrammarProduct.Op.Linear): " ++ show (ls,rs)
-  goT []            []            = []
-  goT []            (Symb t : rs) = Symb (genEps dl ++ t) : goT [] rs
-  goT (Symb t : ls) []            = Symb (t ++ genEps dr) : goT ls []
-  goT (Symb u : ls) (Symb v : rs) = Symb (u++v)           : goT ls rs
+  goT []       []       = []
+  goT []       (t : rs) = (genDel dl <> t) : goT [] rs
+  goT (t : ls) []       = (t <> genDel dr) : goT ls []
+  goT (u : ls) (v : rs) = (u<>v)           : goT ls rs
 
-groupRHS = groupBy ((==) `on` isSymbT)
+groupRHS = groupBy ((==) `on` isTerminal)
 

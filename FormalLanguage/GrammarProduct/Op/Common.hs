@@ -3,7 +3,7 @@
 module FormalLanguage.GrammarProduct.Op.Common where
 
 import qualified Data.Set as S
-import Control.Lens
+import Control.Lens hiding (outside)
 import Data.Set (Set)
 
 import FormalLanguage.CFG.Grammar
@@ -45,4 +45,20 @@ collectEpsilons = S.fromList
 
 genEps :: Symbol -> Symbol -- Symb -> [TN]
 genEps s = Symbol $ replicate (length $ s^.getSymbolList) Epsilon -- replicate (length $ s^.symb) E
+
+-- | Generate a multidim @Deletion@ symbol of the same length as the given
+-- symbol.
+
+genDel :: Symbol -> Symbol -- Symb -> [TN]
+genDel s = Symbol $ replicate (length $ s^.getSymbolList) Deletion -- replicate (length $ s^.symb) E
+
+-- | Checks if two grammars are compatible.
+--
+-- TODO different inside/outside status might not be a big problem!
+
+opCompatible :: Grammar -> Grammar -> Either String ()
+opCompatible l r
+  | dim l /= dim r            = Left "Grammars have different dimensions"
+  | l^.outside /= r^.outside  = Left "Grammars have incompatible inside/outside status"
+  | otherwise                 = Right ()
 

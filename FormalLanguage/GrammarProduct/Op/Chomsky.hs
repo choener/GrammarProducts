@@ -25,6 +25,8 @@ import FormalLanguage.GrammarProduct.Op.Common
 
 
 
+{-
+
 newtype CNF = CNF { runCNF :: Grammar }
 
 instance Semigroup CNF where
@@ -154,3 +156,6 @@ symbToRules u' l'
 
 genTermStar :: Symb -> [TN]
 genTermStar s = map (\case (T s) -> N ("S"++s) Singular ; z -> z) $ s^.symb
+
+-}
+

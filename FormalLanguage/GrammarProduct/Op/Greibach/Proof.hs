@@ -33,6 +33,8 @@ import FormalLanguage.GrammarProduct.Op.Common
 
 
 
+{-
+
 -- * Proof of associativity of the 2-GNF.
 
 -- | Run the 2-gnf grammar with the TwoGNF monoid which observes the 2 star
@@ -158,4 +160,6 @@ twoGNFgrammar = case g of
     , "A -> one   <<< c"
     , "//"
     ]
+
+-}
 

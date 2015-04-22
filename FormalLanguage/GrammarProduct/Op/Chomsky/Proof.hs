@@ -30,6 +30,8 @@ import FormalLanguage.GrammarProduct.Op.Chomsky
 
 
 
+{-
+
 -- * Proof of associativity of the 2-GNF.
 
 -- | Run the 2-gnf grammar with the TwoGNF monoid which observes the 2 star
@@ -73,4 +75,6 @@ cNFgrammar = case g of
 --    , "Sa -> oneT <<< a"
     , "//"
     ]
+
+-}
 

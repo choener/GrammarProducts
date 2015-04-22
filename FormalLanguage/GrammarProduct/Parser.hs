@@ -141,6 +141,26 @@ data ExprGrammar
 gterm :: (String,Grammar) -> Parse Grammar
 gterm (s,g) = g <$ reserveGI s
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 {-
 data GS = GS
   { _ntsyms     :: Map String Integer
