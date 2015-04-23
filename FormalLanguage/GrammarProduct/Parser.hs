@@ -82,8 +82,8 @@ parseGrammarProduct :: Parse m ()
 parseGrammarProduct = do
   reserve fgIdents "Product:"
   n <- newGrammarName
-  current.grammarName .= n
   current <~ parseProductString
+  current.grammarName .= n -- need to set here, otherwise the underlying combinator produces a combined name (funny but useless ;-)
   reserve fgIdents "//"
   v <- use verbose
   g <- use current

@@ -126,6 +126,7 @@ library
 executable AlignGlobal
   if flag(examples)
     build-depends: base               >= 4.7 && < 4.9
+                 , containers
                  , ADPfusion          == 0.4.*
                  , FormalGrammars
                  , GrammarProducts
@@ -141,7 +142,8 @@ executable AlignGlobal
     AlignGlobal.hs
   default-language:
     Haskell2010
-  default-extensions:
+  default-extensions: FlexibleContexts
+                    , TypeFamilies
   ghc-options:
     -O2
     -fcpr-off

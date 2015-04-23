@@ -7,13 +7,15 @@
 
 module FormalLanguage.GrammarProduct.Op.Linear where
 
+import Control.Arrow ((&&&))
 import Data.Semigroup
 import Control.Lens hiding (outside)
 import Control.Applicative
 import qualified Data.Set as S
-import Data.List (groupBy)
+import Data.List (groupBy,nub)
 import Data.Function (on)
 import Data.Default
+import qualified Data.Map as M
 
 import FormalLanguage.CFG.Grammar
 
@@ -29,13 +31,14 @@ newtype Linear a = Linear {runLinear :: a}
 
 instance Semigroup (Linear Grammar) where
   (Linear g) <> (Linear h) = Linear $ Grammar sv st tv io rs s p (g^.grammarName ++ h^.grammarName) False where -- ts ns es rs s (g^.name <> h^.name) where
-    sv = undefined
+    sv = M.fromList . nub . map (_name &&& id) . concatMap _getSymbolList . uniqueSyntacticSymbols $ set rules rs def -- build a temporary @def@ grammar, extract symbols from that one
     st = g^.synterms <> h^.synterms
     tv = g^.termvars <> h^.termvars
     io = g^.outside
-    rs = undefined
-    s  = undefined
-    p  = undefined
+    rs = S.fromList [ direct l r | l <- g^..rules.folded, r <- h^..rules.folded ]
+    s  = (g^.start) <> (h^.start)
+    p  = (g^.params) <> (h^.params)
+    direct l r = Rule (l^.lhs <> r^.lhs) (l^.attr <> r^.attr) (mergeRHS (l^.rhs) (r^.rhs))
     {-
     ts = g^.tsyms <> h^.tsyms
     ns = collectNonTerminals rs

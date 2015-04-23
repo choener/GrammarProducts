@@ -25,9 +25,9 @@ subtract l r
     | dim l /= dim r           = error $ printf "grammars %s and %s have different dimensions, cannot unify. (subtract)" (show l) (show r)
     | l^.outside /= r^.outside = error $ printf "grammars %s and %s have different inside/outside annotation." (show l) (show r)
     | otherwise                = g
-    where sv = M.fromList . map ((_name &&& id) . fst) . uniqueSynVarsWithTape  $ g
-          st = M.fromList . map ((_name &&& id) . fst) . uniqueSynTermsWithTape $ g
-          tv = M.fromList . map ((_name &&& id) . fst) . uniqueTermsWithTape    $ g
+    where sv = M.fromList . map ((_name &&& id) . fst) . uniqueSynVarsWithTape       $ g
+          st = M.fromList . map ((_name &&& id) . fst) . uniqueSynTermsWithTape      $ g
+          tv = M.fromList . map ((_name &&& id) . fst) . uniqueBindableTermsWithTape $ g
           io = l^.outside
           rs = (l^.rules) S.\\ (r^.rules)
           s  = if (anyOf (folded . lhs) ((l^.start) ==) rs) then l^.start else Symbol []
