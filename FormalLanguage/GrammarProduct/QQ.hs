@@ -11,22 +11,26 @@ import           Data.Default (def)
 import           Data.ByteString.Char8 (pack)
 import           Control.Lens
 
-import           FormalLanguage.CFG.QQ (trim)
+import           FormalLanguage.CFG.QQ (trim, parseFormalLanguage)
 import           FormalLanguage.CFG.PrettyPrint.ANSI
 import           FormalLanguage.CFG.Parser
 import           FormalLanguage.CFG.TH
 import           FormalLanguage.CFG.Grammar
 
-import qualified FormalLanguage.GrammarProduct.Parser as P
+import FormalLanguage.GrammarProduct.Parser (parseGrammarProduct)
 
 
 
 grammarProductF = quoteFile grammarProduct
 
 grammarProduct = QuasiQuoter
-  { quoteDec = parseGrammarProduct
-  }
+  { quoteDec  = parseFormalLanguage parseGrammarProduct
+  , quoteExp  = err
+  , quotePat  = err
+  , quoteType = err
+  } where err = error "there is only a Dec quoter"
 
+{-
 parseGrammarProduct :: String -> Q [Dec]
 parseGrammarProduct s = do
   loc <- location
@@ -44,4 +48,5 @@ parseGrammarProduct s = do
       runIO . mapM_ (printDoc . grammarDoc) $ g
       zs <- thCodeGen $ last g
       return zs
+-}
 

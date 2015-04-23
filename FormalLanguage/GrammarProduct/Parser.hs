@@ -45,32 +45,52 @@ import Prelude hiding (subtract)
 import Control.Monad
 import Data.Char (isUpper)
 import Data.Data.Lens
+import System.IO.Unsafe (unsafePerformIO)
 
 import FormalLanguage.CFG.Grammar
 import FormalLanguage.CFG.Parser
+import FormalLanguage.CFG.PrettyPrint.ANSI
 
 import FormalLanguage.GrammarProduct.Op
 
 
 
--- | Parse a product grammar.
+-- TODO can remove, done via better FormalGrammars
 
-parseProduct :: String -> String -> Result [Grammar]
-parseProduct fname cnts = parseString
-  ((evalStateT . runGrammarP) productParser def)
-  (Directed (B.pack fname) 0 0 0 0)
-  cnts
+-- -- | Parse a product grammar.
+-- 
+-- parseProduct :: String -> String -> Result [Grammar]
+-- parseProduct fname cnts = parseString
+--   ((evalStateT . runGrammarP) productParser def)
+--   (Directed (B.pack fname) 0 0 0 0)
+--   cnts
+-- 
+-- -- | Parse all grammars and grammar products, prepending to the list.
+-- 
+-- productParser = go [] <* eof where
+--   go gs = do
+--     whiteSpace
+--     g' <- option Nothing $ Just <$> (try grammar <|> grammarProduct gs)
+--     case g' of
+--       Nothing -> return gs
+--       Just g  -> go (g:gs)
 
--- | Parse all grammars and grammar products, prepending to the list.
+-- | The top-level parser for a grammar product. It can be used as one of the
+-- additional parser arguments, the formal grammars parser accepts.
 
-productParser = go [] <* eof where
-  go gs = do
-    whiteSpace
-    g' <- option Nothing $ Just <$> (try grammar <|> grammarProduct gs)
-    case g' of
-      Nothing -> return gs
-      Just g  -> go (g:gs)
+parseGrammarProduct :: Parse m ()
+parseGrammarProduct = do
+  reserve fgIdents "Product:"
+  n <- newGrammarName
+  current.grammarName .= n
+  current <~ parseProductString
+  reserve fgIdents "//"
+  v <- use verbose
+  g <- use current
+  seq (unsafePerformIO $ if v then (printDoc $ genGrammarDoc g) else return ())
+    $ env %= M.insert n g
 
+{-
 grammarProduct gs = do
   reserveGI "Product:"
   n <- identGI
@@ -78,7 +98,64 @@ grammarProduct gs = do
   e <- getGrammar <$> expr (M.fromList [(g^.name,g) | g<-gs])
   reserveGI "//"
   return $ over (name) (const n) $ transformRenamed r e
+-}
 
+-- | Performs the actual parsing of a product string. Uses an expression parser
+-- internally.
+
+parseProductString :: Parse m Grammar
+parseProductString = getGrammar <$> expr
+  where expr :: Parse m ExprGrammar
+        expr = buildExpressionParser table term
+        table = [ [ binary "><"  exprDirect AssocLeft
+                  , binary "*"   exprPower  AssocLeft
+                  ]
+                , [ binary "+"   exprPlus   AssocLeft
+                  , binary "-"   exprMinus  AssocLeft
+                  ]
+                ]
+        term =   parens expr
+             <|> (ExprGrammar <$> knownGrammarName <?> "grammar not available in environment")
+             <|> (ExprNumber  <$> natural <?> "integral power of grammar")
+        binary n f a = Infix (f <$ reserve fgIdents n) a
+        exprDirect l r = ExprGrammar (getGrammar l ><          getGrammar r)
+        exprPlus   l r = ExprGrammar (getGrammar l `gAdd`      getGrammar r)
+        exprMinus  l r = ExprGrammar (getGrammar l `gSubtract` getGrammar r)
+        exprPower  l r = ExprGrammar (getGrammar l `gPower`    getNumber  r)
+
+data ExprGrammar
+  = ExprGrammar { getGrammar :: Grammar }
+  | ExprNumber  { getNumber  :: Integer }
+
+{-
+expr :: Map String Grammar -> Parse ExprGrammar
+expr g = e where
+  e = buildExpressionParser table term
+  table = [ [ binary "^><" highDirect AssocLeft
+            ]
+          , [ binary "><"  exprDirect AssocLeft
+            , binary "*"   exprPower  AssocLeft
+            ]
+          , [ binary "+"   exprPlus   AssocLeft
+            , binary "-"   exprMinus  AssocLeft
+            ]
+          ]
+  term  =   parens e
+        <|> (choice gts <?> "previously defined grammar")
+        <|> (ExprNumber <$> natural <?> "integral power of grammar")
+  gts = map (fmap ExprGrammar . gterm) $ M.assocs g
+  binary n f a = Infix (f <$ reserveGI n) a
+  exprDirect l r = ExprGrammar $ (getGrammar l >< getGrammar r)
+  exprPlus   l r = ExprGrammar $ gAdd (getGrammar l) (getGrammar r)
+  exprMinus  l r = ExprGrammar $ gSubtract (getGrammar l) (getGrammar r)
+  exprPower  l r = ExprGrammar $ gPower (getGrammar l) (getNumber r)
+  highDirect l r = error "highDirect (not active)!" -- ExprGrammar . unDirect $ times1p (Natural $ getNumber r -1) (Direct $ getGrammar l)
+
+gterm :: (String,Grammar) -> Parse Grammar
+gterm (s,g) = g <$ reserveGI s
+-}
+
+{-
 transformRenamed Nothing  e = e
 transformRenamed (Just r) e = go r e where
   go []     e = e
@@ -111,36 +188,7 @@ renameSymbols = (try rtn <|> rsymb <|> rfun <|> rstart) `sepBy` (symbol ",") whe
   rfun   = RFun   <$> (angles   $ identGI `sepBy` comma) <* string "->" <*> (angles   $ identGI `sepBy` comma)
   rstart = RStart <$ string "S:" <*> (brackets $ identGI `sepBy` comma)
 
-expr :: Map String Grammar -> Parse ExprGrammar
-expr g = e where
-  e = buildExpressionParser table term
-  table = [ [ binary "^><" highDirect AssocLeft
-            ]
-          , [ binary "><"  exprDirect AssocLeft
-            , binary "*"   exprPower  AssocLeft
-            ]
-          , [ binary "+"   exprPlus   AssocLeft
-            , binary "-"   exprMinus  AssocLeft
-            ]
-          ]
-  term  =   parens e
-        <|> (choice gts <?> "previously defined grammar")
-        <|> (ExprNumber <$> natural <?> "integral power of grammar")
-  gts = map (fmap ExprGrammar . gterm) $ M.assocs g
-  binary n f a = Infix (f <$ reserveGI n) a
-  exprDirect l r = ExprGrammar $ (getGrammar l >< getGrammar r)
-  exprPlus   l r = ExprGrammar $ gAdd (getGrammar l) (getGrammar r)
-  exprMinus  l r = ExprGrammar $ gSubtract (getGrammar l) (getGrammar r)
-  exprPower  l r = ExprGrammar $ gPower (getGrammar l) (getNumber r)
-  highDirect l r = error "highDirect (not active)!" -- ExprGrammar . unDirect $ times1p (Natural $ getNumber r -1) (Direct $ getGrammar l)
-
-data ExprGrammar
-  = ExprGrammar { getGrammar :: Grammar }
-  | ExprNumber  { getNumber  :: Integer }
-
-gterm :: (String,Grammar) -> Parse Grammar
-gterm (s,g) = g <$ reserveGI s
-
+-}
 
 
 

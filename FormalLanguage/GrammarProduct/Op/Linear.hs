@@ -8,7 +8,7 @@
 module FormalLanguage.GrammarProduct.Op.Linear where
 
 import Data.Semigroup
-import Control.Lens
+import Control.Lens hiding (outside)
 import Control.Applicative
 import qualified Data.Set as S
 import Data.List (groupBy)
@@ -30,9 +30,9 @@ newtype Linear a = Linear {runLinear :: a}
 instance Semigroup (Linear Grammar) where
   (Linear g) <> (Linear h) = Linear $ Grammar sv st tv io rs s p (g^.grammarName ++ h^.grammarName) False where -- ts ns es rs s (g^.name <> h^.name) where
     sv = undefined
-    st = undefined
-    tv = undefined
-    io = undefined
+    st = g^.synterms <> h^.synterms
+    tv = g^.termvars <> h^.termvars
+    io = g^.outside
     rs = undefined
     s  = undefined
     p  = undefined

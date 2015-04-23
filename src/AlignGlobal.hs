@@ -31,16 +31,18 @@ import           FormalLanguage.GrammarProduct
 Grammar: Step
 N: X
 T: c
+S: X
 X -> stp <<< X c
 X -> del <<< X
 //
 Grammar: Stand
 N: X
+S: X
 X -> del <<< X
 //
 Grammar: Done
 N: X
-T: e
+S: X
 X -> don <<< e
 //
 Product: Global
