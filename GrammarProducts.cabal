@@ -26,7 +26,10 @@ description:
                 .
                 An efficient implementation of the resulting grammars is
                 possible via the ADPfusion framework. The @FormalGrammars@
-                library provides the required "Template Haskell" machinary.
+                library provides the required "Template Haskell" machinery.
+                GramarProducts can be integrated as a plugin into the existing
+                transformation from DSL to ADPfusion. Haskell users can just
+                use the QQ function provided in the .QQ module.
                 .
                 Alternatively, the resulting grammars can also be
                 pretty-printed in various ways (LaTeX, ANSI, Haskell module
@@ -58,24 +61,29 @@ Extra-Source-Files:
   changelog.md
 
 flag examples
-  description: build the examples (only Needleman-Wunsch for now)
-  default: False
-  manual: True
+  description:  build the examples (only Needleman-Wunsch for now)
+  default:      False
+  manual:       True
+
+flag llvm
+  description:  build using LLVM
+  default:      False
+  manual:       True
 
 library
-  build-depends: base               >= 4.7    && < 4.9
-               , ansi-wl-pprint     >= 0.6    && < 0.7
-               , bytestring         >= 0.10   && < 0.11
-               , containers         >= 0.5    && < 0.6
-               , data-default       >= 0.5    && < 0.6
-               , FormalGrammars     == 0.2.*
-               , lens               >= 4      && < 5
-               , newtype            >= 0.2    && < 0.3
-               , parsers            >= 0.12   && < 0.13
-               , semigroups         >= 0.15   && < 0.17
-               , template-haskell   >= 2      && < 3
-               , transformers       >= 0.4    && < 0.5
-               , trifecta           >= 1.5    && < 1.6
+  build-depends: base               >= 4.7      && < 4.9
+               , ansi-wl-pprint     >= 0.6      && < 0.7
+               , bytestring         >= 0.10     && < 0.11
+               , containers         >= 0.5      && < 0.6
+               , data-default       >= 0.5      && < 0.6
+               , FormalGrammars     == 0.2.0.*
+               , lens               >= 4        && < 5
+               , newtype            >= 0.2      && < 0.3
+               , parsers            >= 0.12     && < 0.13
+               , semigroups         >= 0.15     && < 0.17
+               , template-haskell   >= 2        && < 3
+               , transformers       >= 0.4      && < 0.5
+               , trifecta           >= 1.5      && < 1.6
   exposed-modules:
     FormalLanguage.GrammarProduct
     FormalLanguage.GrammarProduct.Op
@@ -96,7 +104,8 @@ library
   default-extensions: FlexibleContexts
                     , FlexibleInstances
   ghc-options:
-    -O2 -funbox-strict-fields
+    -O2
+    -funbox-strict-fields
 
 -- With grammar products, we need a refined way of turning input source files
 -- into LaTeX and Haskell modules.
@@ -125,12 +134,12 @@ library
 
 executable AlignGlobal
   if flag(examples)
-    build-depends: base               >= 4.7 && < 4.9
+    build-depends: base               >= 4.7      && < 4.9
+                 , ADPfusion          == 0.4.0.*
                  , containers
-                 , ADPfusion          == 0.4.*
                  , FormalGrammars
                  , GrammarProducts
-                 , PrimitiveArray     == 0.6.*
+                 , PrimitiveArray     == 0.6.0.*
                  , template-haskell
                  , vector             == 0.10.*
     buildable: True
@@ -150,9 +159,11 @@ executable AlignGlobal
     -funbox-strict-fields
     -funfolding-use-threshold1000
     -funfolding-keeness-factor1000
-    -fllvm
-    -optlo-O3
-    -fllvm-tbaa
+    if flag(llvm)
+      ghc-options:
+        -fllvm
+        -optlo-O3
+        -fllvm-tbaa
 
 source-repository head
   type: git
