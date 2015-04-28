@@ -1,5 +1,3 @@
-{-# LANGUAGE PatternGuards #-}
-{-# LANGUAGE ParallelListComp #-}
 
 module FormalLanguage.GrammarProduct.Op.Greibach.Proof where
 

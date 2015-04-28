@@ -1,7 +1,3 @@
-{-# LANGUAGE TypeOperators #-}
-{-# LANGUAGE BangPatterns #-}
-{-# LANGUAGE TemplateHaskell #-}
-{-# LANGUAGE QuasiQuotes #-}
 
 -- | The Nussinov RNA secondary structure prediction problem.
 
@@ -58,6 +54,7 @@ Emit: Global
 makeAlgebraProductH ['h] ''SigGlobal
 
 
+
 score :: Monad m => SigGlobal m Int Int Char
 score = SigGlobal
   { donDon = \   (Z:.():.()) -> 0
@@ -68,24 +65,26 @@ score = SigGlobal
   }
 {-# INLINE score #-}
 
--- | 
+-- |
+--
+-- TODO use fmlist to make this more efficient.
 
-pretty :: Monad m => SigGlobal m [Seq Char] (SM.Stream m [Seq Char]) Char
+pretty :: Monad m => SigGlobal m (String,String) [(String,String)] Char
 pretty = SigGlobal
-  { donDon = \       (Z:.():.()) -> [empty,empty]
-  , stpStp = \ [x,y] (Z:.a :.b ) -> [x |> a  ,y |> b  ]
-  , delStp = \ [x,y] (Z:.():.b ) -> [x |> '-',y |> b  ]
-  , stpDel = \ [x,y] (Z:.a :.()) -> [x |> a  ,y |> '-']
-  , h      = return . id
+  { donDon = \       (Z:.():.()) -> ("","")
+  , stpStp = \ (x,y) (Z:.a :.b ) -> (x ++ [a],y ++ [b])
+  , delStp = \ (x,y) (Z:.():.b ) -> (x ++ "-",y ++ [b])
+  , stpDel = \ (x,y) (Z:.a :.()) -> (x ++ [a],y ++ "-")
+  , h      = SM.toList
   }
 
-runNeedlemanWunsch :: Int -> String -> String -> (Int,[[Seq Char]])
-runNeedlemanWunsch k i1' i2' = (d, take k . S.toList . unId $ axiom b) where
+runNeedlemanWunsch :: Int -> String -> String -> (Int,[(String,String)])
+runNeedlemanWunsch k i1' i2' = (d, take k . unId $ axiom b) where
   i1 = VU.fromList i1'
   i2 = VU.fromList i2'
   !(Z:.t) = runNeedlemanWunschForward i1 i2
   d = unId $ axiom t
-  !(Z:.b) = gGlobal (score <** pretty) (toBacktrack t (undefined :: Id a -> Id a)) (chr i1) (chr i2)
+  !(Z:.b) = gGlobal (score <|| pretty) (toBacktrack t (undefined :: Id a -> Id a)) (chr i1) (chr i2)
 {-# NoInline runNeedlemanWunsch #-}
 
 -- | Decoupling the forward phase for CORE observation.
@@ -105,7 +104,7 @@ main = do
         putStrLn a
         putStrLn b
         let (k,ys) = runNeedlemanWunsch 1 a b
-        forM_ ys $ \[y1,y2] -> printf "%s %5d\n%s\n" (toList y1) k (toList y2)
+        forM_ ys $ \(y1,y2) -> printf "%s %5d\n%s\n" y1 k y2
         eats xs
   eats ls
 

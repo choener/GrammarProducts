@@ -1,8 +1,11 @@
 0.1.0.0
+-------
 
 - major version bump
 - updated dependencies
-- using ADPfusion 0.3 now
+- using ADPfusion 0.4.0.0 now
+- rewritten as 'plugin' of FormalGrammars
+- QQ here combines FormalGrammars + GrammarProducts
 
 0.0.1.0
 -------

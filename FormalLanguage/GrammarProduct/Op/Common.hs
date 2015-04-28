@@ -1,4 +1,3 @@
-{-# LANGUAGE LambdaCase #-}
 
 module FormalLanguage.GrammarProduct.Op.Common where
 

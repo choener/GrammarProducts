@@ -1,6 +1,3 @@
-{-# LANGUAGE UnicodeSyntax #-}
-{-# LANGUAGE LambdaCase #-}
-{-# LANGUAGE PatternGuards #-}
 
 module FormalLanguage.GrammarProduct.Op.Chomsky where
 

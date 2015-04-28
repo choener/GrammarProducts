@@ -1,4 +1,3 @@
-{-# LANGUAGE ParallelListComp #-}
 
 module FormalLanguage.GrammarProduct.Op.Greibach where
 

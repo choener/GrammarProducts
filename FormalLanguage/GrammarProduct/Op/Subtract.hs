@@ -1,4 +1,3 @@
-{-# LANGUAGE FlexibleInstances #-}
 
 module FormalLanguage.GrammarProduct.Op.Subtract where
 
