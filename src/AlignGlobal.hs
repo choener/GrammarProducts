@@ -51,7 +51,7 @@ Step >< Step  -  Stand * 2  +  Done * 2
 Emit: Global
 |]
 
-makeAlgebraProductH ['h] ''SigGlobal
+makeAlgebraProduct ''SigGlobal
 
 
 

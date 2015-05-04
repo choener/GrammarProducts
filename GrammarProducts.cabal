@@ -165,6 +165,8 @@ executable AlignGlobal
     Haskell2010
   default-extensions: BangPatterns
                     , FlexibleContexts
+                    , FlexibleInstances
+                    , MultiParamTypeClasses
                     , QuasiQuotes
                     , TemplateHaskell
                     , TypeFamilies
