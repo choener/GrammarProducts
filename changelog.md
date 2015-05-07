@@ -6,6 +6,7 @@
 - using ADPfusion 0.4.0.0 now
 - rewritten as 'plugin' of FormalGrammars
 - QQ here combines FormalGrammars + GrammarProducts
+- travis-ci integration
 
 0.0.1.0
 -------
