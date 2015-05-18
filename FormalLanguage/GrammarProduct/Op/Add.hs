@@ -1,7 +1,7 @@
 
 module FormalLanguage.GrammarProduct.Op.Add where
 
-import Control.Lens hiding (outside)
+import Control.Lens hiding (outside,indices)
 import Control.Lens.Fold
 import Control.Newtype
 import Data.List (genericReplicate)
@@ -43,6 +43,7 @@ instance Semigroup (Add Grammar) where
                                 (l^.rules <> r^.rules) -- 
                                 s
                                 (l^.params <> r^.params)
+                                (l^.indices <> r^.indices)
                                 (l^.grammarName <> r^.grammarName)
                                 False
     where s | l^.start == r^.start = l^.start

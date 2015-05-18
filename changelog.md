@@ -1,3 +1,8 @@
+0.1.1.0
+-------
+
+- FormalGrammar == 0.2.1.x with revamped indexed rules system
+
 0.1.0.0
 -------
 

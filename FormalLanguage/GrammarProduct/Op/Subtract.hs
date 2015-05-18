@@ -3,7 +3,7 @@ module FormalLanguage.GrammarProduct.Op.Subtract where
 
 import           Control.Arrow ((&&&))
 import           Control.Lens.Fold
-import           Control.Lens hiding (outside)
+import           Control.Lens hiding (outside,indices)
 import           Control.Newtype
 import           Data.List (genericReplicate)
 import           Data.Semigroup
@@ -24,14 +24,15 @@ subtract l r
     | dim l /= dim r           = error $ printf "grammars %s and %s have different dimensions, cannot unify. (subtract)" (show l) (show r)
     | l^.outside /= r^.outside = error $ printf "grammars %s and %s have different inside/outside annotation." (show l) (show r)
     | otherwise                = g
-    where sv = M.fromList . map ((_name &&& id) . fst) . uniqueSynVarsWithTape       $ g
-          st = M.fromList . map ((_name &&& id) . fst) . uniqueSynTermsWithTape      $ g
-          tv = M.fromList . map ((_name &&& id) . fst) . uniqueBindableTermsWithTape $ g
-          io = l^.outside
-          rs = (l^.rules) S.\\ (r^.rules)
-          s  = if (anyOf (folded . lhs) ((l^.start) ==) rs) then l^.start else Symbol []
-          p  = M.union (l^.params) (r^.params)
-          g  = Grammar sv st tv io rs s p (l^.grammarName ++ r^.grammarName) False
+    where sv  = M.fromList . map ((_name &&& id) . fst) . uniqueSynVarsWithTape       $ g
+          st  = M.fromList . map ((_name &&& id) . fst) . uniqueSynTermsWithTape      $ g
+          tv  = M.fromList . map ((_name &&& id) . fst) . uniqueBindableTermsWithTape $ g
+          io  = l^.outside
+          rs  = (l^.rules) S.\\ (r^.rules)
+          s   = if (anyOf (folded . lhs) ((l^.start) ==) rs) then l^.start else Symbol []
+          p   = M.union (l^.params) (r^.params)
+          ixs = M.union (l^.indices) (r^.indices)
+          g   = Grammar sv st tv io rs s p ixs (l^.grammarName ++ r^.grammarName) False
 
 {-
 subtract l r
