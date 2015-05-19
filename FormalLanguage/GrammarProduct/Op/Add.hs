@@ -47,7 +47,7 @@ instance Semigroup (Add Grammar) where
                                 (l^.grammarName <> r^.grammarName)
                                 False
     where s | l^.start == r^.start = l^.start
-            | l^.start /= mempty && r^.start /= mempty = error "add new start symbol"
+            | l^.start /= mempty && r^.start /= mempty = l^.start -- error "add new start symbol" -- TODO to be discussed ?!
             | l^.start == mempty                       = r^.start
             |                       r^.start == mempty = l^.start
 
