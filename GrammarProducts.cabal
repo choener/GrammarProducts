@@ -2,7 +2,6 @@ name:           GrammarProducts
 version:        0.1.1.0
 author:         Christian Hoener zu Siederdissen, 2013-2015
 copyright:      Christian Hoener zu Siederdissen, 2013-2015
-homepage:       http://www.bioinf.uni-leipzig.de/gADP/
 homepage:       https://github.com/choener/GrammarProducts
 bug-reports:    https://github.com/choener/GrammarProducts/issues
 maintainer:     choener@bioinf.uni-leipzig.de
@@ -15,6 +14,8 @@ cabal-version:  >= 1.10.0
 tested-with:    GHC == 7.8.4, GHC == 7.10.1
 synopsis:       Grammar products and higher-dimensional grammars
 description:
+                <http://www.bioinf.uni-leipzig.de/Software/gADP/ generalized Algebraic Dynamic Programming>
+                .
                 An algebra of liner and context-free grammars.
                 .
                 This library provides the implementation of our theory of
@@ -37,25 +38,9 @@ description:
                 pretty-printed in various ways (LaTeX, ANSI, Haskell module
                 with signature and grammar).
                 .
-                .
-                .
-                Formal background can be found in two papers:
-                .
-                @
-                Christian Höner zu Siederdissen, Ivo L. Hofacker, and Peter F. Stadler.
-                Product Grammars for Alignment and Folding.
-                2014. IEEE/ACM Transactions on Computational Biology and Bioinformatics. 99.
-                <http://ieeexplore.ieee.org/xpl/articleDetails.jsp?arnumber=6819790>
-                @
-                .
-                and
-                .
-                @
-                Christian Höner zu Siederdissen, Ivo L. Hofacker, and Peter F. Stadler
-                How to Multiply Dynamic Programming Algorithms
-                Brazilian Symposium on Bioinformatics (BSB 2013)
-                Lecture Notes in Bioinformatics 8213, Springer, Heidelberg
-                @
+                The formal background can be found in two papers given in the
+                README. The gADP homepage has further details, tutorials,
+                examples.
                 .
 
 
@@ -68,11 +53,6 @@ Extra-Source-Files:
 
 flag examples
   description:  build the examples (only Needleman-Wunsch for now)
-  default:      False
-  manual:       True
-
-flag llvm
-  description:  build using LLVM
   default:      False
   manual:       True
 
@@ -187,11 +167,6 @@ executable AlignGlobal
     -funbox-strict-fields
     -funfolding-use-threshold1000
     -funfolding-keeness-factor1000
-  if flag(llvm)
-    ghc-options:
-      -fllvm
-      -optlo-O3
-      -fllvm-tbaa
 
 
 
