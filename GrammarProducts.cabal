@@ -60,7 +60,7 @@ flag examples
 
 library
   build-depends: base               >= 4.7      && < 4.9
-               , ADPfusion          >= 0.4.1    && < 0.4.2
+               , ADPfusion          >= 0.4.1    && < 0.4.3
                , ansi-wl-pprint     >= 0.6      && < 0.7
                , bytestring         >= 0.10     && < 0.11
                , containers         >= 0.5      && < 0.6
