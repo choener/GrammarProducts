@@ -42,7 +42,7 @@ gPower = P.power
 
 (><) :: Grammar -> Grammar -> Grammar
 g >< h
-  | isLeftLinear g && isLeftLinear h = runLinear $ Linear g <> Linear h
+  | isLinear g && isLinear h         = runLinear $ Linear g <> Linear h
 --  | isChomskyNF  g && isChomskyNF  h = runCNF $ CNF g <> CNF h
 --  | isGreibachNF g && isGreibachNF h = runTwoGNF $ TwoGNF g <> TwoGNF h
   | otherwise                        = error "Grammars in general CFG form are not handled. You need to convert into either Greibach- or Chomsky normal form. This might change in the future"

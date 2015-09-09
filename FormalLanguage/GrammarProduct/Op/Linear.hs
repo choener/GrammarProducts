@@ -7,15 +7,15 @@
 
 module FormalLanguage.GrammarProduct.Op.Linear where
 
-import Control.Arrow ((&&&))
-import Data.Semigroup
-import Control.Lens hiding (outside,indices)
-import Control.Applicative
-import qualified Data.Set as S
-import Data.List (groupBy,nub)
-import Data.Function (on)
-import Data.Default
+import           Control.Applicative
+import           Control.Arrow ((&&&),second)
+import           Control.Lens hiding (outside,indices)
+import           Data.Default
+import           Data.Function (on)
+import           Data.List (groupBy,nub)
+import           Data.Semigroup
 import qualified Data.Map as M
+import qualified Data.Set as S
 
 import FormalLanguage.CFG.Grammar
 
@@ -54,7 +54,11 @@ instance Monoid (Linear Grammar) where
 
 -- | Merges right-hand sides in a linear direct product. For full-fledged CFGs
 -- in different normal forms, see the GNF and CNF implementations.
+--
+-- TODO get prefix, get single NT, get suffix ;;; merge prefixes, merge
+-- single NTs, merge suffixes ;;; and in case of no NTs? prefer prefixes?
 
+{-
 mergeRHS :: [Symbol] -> [Symbol] -> [Symbol]
 mergeRHS [] rs = rs -- neutral element
 mergeRHS ls [] = ls -- neutral element
@@ -83,6 +87,24 @@ mergeRHS ls' rs' = concat $ go (groupRHS ls') (groupRHS rs') where
   goT []       (t : rs) = (genDel dl <> t) : goT [] rs
   goT (t : ls) []       = (t <> genDel dr) : goT ls []
   goT (u : ls) (v : rs) = (u<>v)           : goT ls rs
+-}
+
+mergeRHS :: [Symbol] -> [Symbol] -> [Symbol]
+mergeRHS [] rs = rs
+mergeRHS ls [] = ls
+mergeRHS ls rs = joinFix pls prs ++ joinSymbol ils irs ++ joinFix sls srs
+  where (pls,(ils,sls)) = second (span isSyntactic) . break isSyntactic $ ls
+        (prs,(irs,srs)) = second (span isSyntactic) . break isSyntactic $ rs
+        joinFix []       []       = []
+        joinFix []       (t : rs) = (genDel  l <> t) : joinFix [] rs
+        joinFix (t : ls) []       = (t <> genDel r ) : joinFix ls []
+        joinFix (u : ls) (v : rs) = (u<>v)           : joinFix ls rs
+        joinSymbol [l] [r] = [l <> r]
+        joinSymbol []  [r] = [genDel l <> r]
+        joinSymbol [l] []  = [l <> genDel r]
+        joinSymbol []  []  = []
+        l = head ls
+        r = head rs
 
 groupRHS = groupBy ((==) `on` isTerminal)
 
