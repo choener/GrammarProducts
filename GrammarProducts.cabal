@@ -1,5 +1,5 @@
 name:           GrammarProducts
-version:        0.1.1.0
+version:        0.1.1.1
 author:         Christian Hoener zu Siederdissen, 2013-2015
 copyright:      Christian Hoener zu Siederdissen, 2013-2015
 homepage:       https://github.com/choener/GrammarProducts
@@ -143,7 +143,7 @@ executable AlignGlobal
                  , GrammarProducts
                  , PrimitiveArray
                  , template-haskell
-                 , vector             >= 0.10     && < 0.11
+                 , vector             >= 0.10     && < 0.12
     buildable: True
   else
     buildable: False

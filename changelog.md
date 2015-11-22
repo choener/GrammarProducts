@@ -1,7 +1,13 @@
+0.1.1.1
+-------
+
+- FormalGrammars == 0.2.1.1
+- relaxed upper bounds
+
 0.1.1.0
 -------
 
-- FormalGrammar == 0.2.1.x with revamped indexed rules system
+- FormalGrammars == 0.2.1.x with revamped indexed rules system
 - new travis.yml
 
 0.1.0.0
