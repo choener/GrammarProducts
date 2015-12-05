@@ -1,5 +1,5 @@
 name:           GrammarProducts
-version:        0.1.1.1
+version:        0.1.1.2
 author:         Christian Hoener zu Siederdissen, 2013-2015
 copyright:      Christian Hoener zu Siederdissen, 2013-2015
 homepage:       https://github.com/choener/GrammarProducts
@@ -65,7 +65,7 @@ library
                , bytestring         >= 0.10     && < 0.11
                , containers         >= 0.5      && < 0.6
                , data-default       >= 0.5      && < 0.6
-               , FormalGrammars     >= 0.2.1    && < 0.2.2
+               , FormalGrammars     >= 0.2.1    && < 0.3.1
                , lens               >= 4        && < 5
                , newtype            >= 0.2      && < 0.3
                , parsers            >= 0.12     && < 0.13
@@ -139,7 +139,7 @@ executable AlignGlobal
     build-depends: base               >= 4.7      && < 4.9
                  , ADPfusion
                  , containers
-                 , FormalGrammars
+                 , FormalGrammars     >= 0.3
                  , GrammarProducts
                  , PrimitiveArray
                  , template-haskell

@@ -1,3 +1,9 @@
+0.1.1.2
+-------
+
+- This new version builds with both FormalGrammars 0.2 and 0.3. However, the
+  example requires 0.3
+
 0.1.1.1
 -------
 
