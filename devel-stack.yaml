@@ -1,10 +1,12 @@
-resolver: lts-3.15
+resolver: lts-3.16
 packages:
 - '.'
 - location: ../Lib-FormalGrammars/
   extra-dep: true
+- location: ../Lib-ADPfusion/
+  extra-dep: true
 extra-deps:
-- ADPfusion-0.5.0.0
+- ADPfusion-0.5.1.0
 - FormalGrammars-0.3.0.0
 - OrderedBits-0.0.1.0
 - PrimitiveArray-0.7.0.0
