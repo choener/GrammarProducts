@@ -30,7 +30,7 @@ import Text.Printf
 import Text.Trifecta
 import Text.Trifecta.Delta
 import Text.Trifecta.Result
-import Data.Semigroup ((<>),times1p)
+import Data.Semigroup ((<>))
 import qualified Control.Newtype as T
 --import Numeric.Natural.Internal
 import Prelude hiding (subtract)
