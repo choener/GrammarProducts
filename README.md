@@ -4,7 +4,7 @@
 
 [*generalized Algebraic Dynamic Programming Homepage*](http://www.bioinf.uni-leipzig.de/Software/gADP/)
 
-An algebra of liner and context-free grammars.
+An abstract algebra for linear and context-free grammars.
 
 1.  Christian Höner zu Siederdissen, Ivo L. Hofacker, and Peter F. Stadler.  
     *Product Grammars for Alignment and Folding*  
