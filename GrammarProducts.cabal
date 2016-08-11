@@ -69,7 +69,7 @@ library
                , lens               >= 4        && < 5
                , newtype            >= 0.2      && < 0.3
                , parsers            >= 0.12     && < 0.13
-               , PrimitiveArray     >= 0.6.0.1  && < 0.7.1
+               , PrimitiveArray     >= 0.6.0.1  && < 0.7.2
                , semigroups         >= 0.15     && < 0.19
                , template-haskell   >= 2        && < 3
                , transformers       >= 0.4      && < 0.5
