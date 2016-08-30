@@ -59,7 +59,7 @@ flag examples
 
 
 library
-  build-depends: base               >= 4.7      && < 4.9
+  build-depends: base               >= 4.7      && < 5.0
                , ADPfusion          >= 0.5.1    && < 0.5.3
                , ansi-wl-pprint     >= 0.6      && < 0.7
                , bytestring         >= 0.10     && < 0.11
@@ -72,7 +72,7 @@ library
                , PrimitiveArray     >= 0.6.0.1  && < 0.7.2
                , semigroups         >= 0.15     && < 0.19
                , template-haskell   >= 2        && < 3
-               , transformers       >= 0.4      && < 0.5
+               , transformers       >= 0.4      && < 0.6
                , trifecta           >= 1.5      && < 1.6
   exposed-modules:
     FormalLanguage.GrammarProduct
