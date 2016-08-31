@@ -60,20 +60,21 @@ flag examples
 
 library
   build-depends: base               >= 4.7      && < 5.0
-               , ADPfusion          >= 0.5.1    && < 0.5.3
                , ansi-wl-pprint     >= 0.6      && < 0.7
                , bytestring         >= 0.10     && < 0.11
                , containers         >= 0.5      && < 0.6
                , data-default       >= 0.5      && < 0.6
-               , FormalGrammars     >= 0.2.1    && < 0.3.2
                , lens               >= 4        && < 5
                , newtype            >= 0.2      && < 0.3
                , parsers            >= 0.12     && < 0.13
-               , PrimitiveArray     >= 0.6.0.1  && < 0.7.2
                , semigroups         >= 0.15     && < 0.19
                , template-haskell   >= 2        && < 3
                , transformers       >= 0.4      && < 0.6
-               , trifecta           >= 1.5      && < 1.6
+               , trifecta           >= 1.6      && < 1.7
+               --
+               , ADPfusion          == 0.5.2.*
+               , FormalGrammars     == 0.3.1.*
+               , PrimitiveArray     == 0.7.1.*
   exposed-modules:
     FormalLanguage.GrammarProduct
     FormalLanguage.GrammarProduct.Op
