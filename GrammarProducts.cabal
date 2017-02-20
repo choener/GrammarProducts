@@ -138,13 +138,14 @@ library
 executable AlignGlobal
   if flag(examples)
     build-depends: base               >= 4.7    && < 5.0
-                 , ADPfusion
                  , containers
+                 , template-haskell
+                 , vector             >= 0.10
+                 --
+                 , ADPfusion
                  , FormalGrammars     >= 0.3
                  , GrammarProducts
                  , PrimitiveArray
-                 , template-haskell
-                 , vector             >= 0.10
     buildable: True
   else
     buildable: False
