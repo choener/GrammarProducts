@@ -53,11 +53,12 @@ genDel s = Symbol $ replicate (length $ s^.getSymbolList) Deletion -- replicate 
 
 -- | Checks if two grammars are compatible.
 --
--- TODO different inside/outside status might not be a big problem!
+-- TODO different inside/outside status might not be a big problem! years
+-- later: let's see if that holds true!
 
 opCompatible :: Grammar -> Grammar -> Either String ()
 opCompatible l r
   | dim l /= dim r            = Left "Grammars have different dimensions"
-  | l^.outside /= r^.outside  = Left "Grammars have incompatible inside/outside status"
+--  | l^.outside /= r^.outside  = Left "Grammars have incompatible inside/outside status"
   | otherwise                 = Right ()
 
