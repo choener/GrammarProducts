@@ -1,3 +1,8 @@
+0.1.1.4
+-------
+
+- ADPfusion version bump (we still carefully track our own version bounds!)
+
 0.1.1.3
 -------
 
