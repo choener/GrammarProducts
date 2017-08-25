@@ -70,7 +70,7 @@ library
                , semigroups         >= 0.15
                , template-haskell   >= 2
                , transformers       >= 0.4
-               , trifecta           >= 1.6
+               , trifecta           >= 1.7.1.1
                --
                , ADPfusion          == 0.5.3.*
                , FormalGrammars     == 0.3.1.*
