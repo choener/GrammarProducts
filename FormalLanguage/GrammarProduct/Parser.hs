@@ -446,8 +446,8 @@ type Parse a = (Monad m, TokenParsing m, MonadPlus m) => StateT GS m a
 type ParseU a = (Monad m, TokenParsing m, MonadPlus m) => Unlined (StateT GS m) a
 type ParseG a = (Monad m, TokenParsing m, MonadPlus m) => m a
 
-instance MonadTrans Unlined where
-  lift = Unlined
-  {-# INLINE lift #-}
--}
+-- instance MonadTrans Unlined where
+--   lift = Unlined
+--   {-# INLINE lift #-}
+-- -}
 
