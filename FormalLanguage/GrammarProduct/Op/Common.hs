@@ -6,6 +6,7 @@ import Control.Lens hiding (outside)
 import Data.Set (Set)
 
 import FormalLanguage.CFG.Grammar
+import ADP.Fusion.Core.Term.Epsilon (LocalGlobal(..))
 
 
 
@@ -43,7 +44,7 @@ collectEpsilons = S.fromList
 -- symbol.
 
 genEps :: Symbol -> Symbol -- Symb -> [TN]
-genEps s = Symbol $ replicate (length $ s^.getSymbolList) Epsilon -- replicate (length $ s^.symb) E
+genEps s = Symbol $ replicate (length $ s^.getSymbolList) $ Epsilon Global -- replicate (length $ s^.symb) E
 
 -- | Generate a multidim @Deletion@ symbol of the same length as the given
 -- symbol.
