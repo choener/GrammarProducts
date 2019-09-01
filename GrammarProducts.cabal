@@ -97,6 +97,7 @@ library
                     , LambdaCase
                     , NoMonomorphismRestriction
                     , OverloadedStrings
+                    , PackageImports
                     , ParallelListComp
                     , PatternGuards
                     , RankNTypes

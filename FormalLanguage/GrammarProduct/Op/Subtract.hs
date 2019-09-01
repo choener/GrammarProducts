@@ -4,7 +4,7 @@ module FormalLanguage.GrammarProduct.Op.Subtract where
 import           Control.Arrow ((&&&))
 import           Control.Lens.Fold
 import           Control.Lens hiding (outside,indices)
-import           Control.Newtype
+import "newtype" Control.Newtype
 import           Data.List (genericReplicate)
 import           Data.Semigroup
 import qualified Data.Map as M

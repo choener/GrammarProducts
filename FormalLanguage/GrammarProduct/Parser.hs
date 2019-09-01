@@ -31,7 +31,7 @@ import Text.Trifecta
 import Text.Trifecta.Delta
 import Text.Trifecta.Result
 import Data.Semigroup ((<>))
-import qualified Control.Newtype as T
+import qualified "newtype" Control.Newtype as T
 --import Numeric.Natural.Internal
 import Prelude hiding (subtract)
 import Control.Monad

@@ -3,7 +3,7 @@ module FormalLanguage.GrammarProduct.Op.Add where
 
 import Control.Lens hiding (outside,indices)
 import Control.Lens.Fold
-import Control.Newtype
+import "newtype" Control.Newtype
 import Data.List (genericReplicate)
 import Data.Monoid hiding ((<>))
 import Data.Semigroup

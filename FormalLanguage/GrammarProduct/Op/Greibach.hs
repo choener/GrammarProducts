@@ -4,7 +4,7 @@ module FormalLanguage.GrammarProduct.Op.Greibach where
 import Control.Applicative
 import Control.Lens
 import Control.Lens.Fold
-import Control.Newtype ()
+import "newtype" Control.Newtype ()
 import Data.Function (on)
 import Data.List (genericReplicate)
 import Data.List (groupBy)
