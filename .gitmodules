@@ -9,7 +9,7 @@
 [submodule "deps/FormalGrammars"]
 	path = deps/FormalGrammars
 	url = workrepo:Repository/Lib-FormalGrammars
-	branch = devel
+	branch = rewrite
 [submodule "deps/DPutils"]
 	path = deps/DPutils
 	url = workrepo:Repository/Lib-DPutils

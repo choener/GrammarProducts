@@ -18,7 +18,7 @@ import           Text.Printf
 import           Data.Sequence ((|>),Seq,empty)
 import           Data.Foldable (toList)
 
-import           ADP.Fusion
+import           ADP.Fusion.PointL
 import           Data.PrimitiveArray as PA hiding (map,toList)
 import           FormalLanguage.CFG
 
@@ -44,18 +44,18 @@ N: X
 S: X
 X -> don <<< e
 //
-Product: Global
+Product: Glbl
 Step >< Step  -  Stand * 2  +  Done * 2
 //
-Emit: Global
+Emit: Glbl
 |]
 
-makeAlgebraProduct ''SigGlobal
+makeAlgebraProduct ''SigGlbl
 
 
 
-score :: Monad m => SigGlobal m Int Int Char Char
-score = SigGlobal
+score :: Monad m => SigGlbl m Int Int Char Char
+score = SigGlbl
   { donDon = \   (Z:.():.()) -> 0
   , stpStp = \ x (Z:.a :.b ) -> if a==b then x+1 else -999999
   , delStp = \ x (Z:.():.b ) -> x - 2
@@ -68,8 +68,8 @@ score = SigGlobal
 --
 -- TODO use fmlist to make this more efficient.
 
-pretty :: Monad m => SigGlobal m (String,String) [(String,String)] Char Char
-pretty = SigGlobal
+pretty :: Monad m => SigGlbl m (String,String) [(String,String)] Char Char
+pretty = SigGlbl
   { donDon = \       (Z:.():.()) -> ("","")
   , stpStp = \ (x,y) (Z:.a :.b ) -> (x ++ [a],y ++ [b])
   , delStp = \ (x,y) (Z:.():.b ) -> (x ++ "-",y ++ [b])
@@ -83,14 +83,14 @@ runNeedlemanWunsch k i1' i2' = (d, take k . unId $ axiom b) where
   i2 = VU.fromList i2'
   !(Z:.t) = runNeedlemanWunschForward i1 i2
   d = unId $ axiom t
-  !(Z:.b) = gGlobal (score <|| pretty) (toBacktrack t (undefined :: Id a -> Id a)) (chr i1) (chr i2)
+  !(Z:.b) = gGlbl (score <|| pretty) (toBacktrack t (undefined :: Id a -> Id a)) (chr i1) (chr i2)
 {-# NoInline runNeedlemanWunsch #-}
 
 -- | Decoupling the forward phase for CORE observation.
 
-runNeedlemanWunschForward :: Vector Char -> Vector Char -> Z:.(ITbl Id Unboxed (Z:.PointL I:.PointL I) Int)
+runNeedlemanWunschForward :: Vector Char -> Vector Char -> Z:.(ITbl _ _ Id (Dense VU.Vector) (Z:.PointL I:.PointL I) Int)
 runNeedlemanWunschForward i1 i2 = let n1 = VU.length i1; n2 = VU.length i2 in mutateTablesDefault $
-  gGlobal score
+  gGlbl score
     (ITbl 0 0 (Z:.EmptyOk:.EmptyOk) (PA.fromAssocs (Z:.PointL 0:.PointL 0) (Z:.PointL n1:.PointL n2) (-999999) []))
     (chr i1) (chr i2)
 {-# NoInline runNeedlemanWunschForward #-}
