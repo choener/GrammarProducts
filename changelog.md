@@ -1,3 +1,10 @@
+0.2.0.0
+-------
+
+- cleanup and version bumped to ADPfusion 0.6
+- small rewrite of some of the underlying machinery
+- updated the example "AlignGlobal"
+
 0.1.1.4
 -------
 

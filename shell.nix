@@ -50,6 +50,7 @@ hsPkgs.shellFor {
     # haskellPackages.ghcid
     # haskellPackages.hpack
     cabalghci
+    haskell-ci
     # hsPkgs.nvim-hs-ghcid
   ];
 } # shellFor
