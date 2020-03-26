@@ -55,7 +55,6 @@ flag examples
 
 library
   build-depends: base               >= 4.7      && < 5.0
-               , ansi-wl-pprint     >= 0.6
                , bytestring         >= 0.10
                , containers         >= 0.5
                , data-default       >= 0.5
@@ -65,8 +64,7 @@ library
                , semigroups         >= 0.15
                , template-haskell   >= 2
                , transformers       >= 0.4
--- due to we still using ansi-wl-pprint
-               , trifecta           >= 1.7.1.1  && < 2.1
+               , trifecta           >= 2.1
                --
                , ADPfusion          == 0.6.0.*
                , FormalGrammars     == 0.4.0.*
