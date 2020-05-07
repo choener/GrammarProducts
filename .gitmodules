@@ -1,4 +1,0 @@
-[submodule "deps/FormalGrammars"]
-	path = deps/FormalGrammars
-	url = workrepo:Repository/Lib-FormalGrammars
-	branch = rewrite
