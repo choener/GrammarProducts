@@ -1,0 +1,16 @@
+
+[ADPfusion]
+checkout = git clone 'git@github.com:choener/ADPfusion.git' 'ADPfusion'
+
+[DPutils]
+checkout = git clone 'git@github.com:choener/DPutils.git' 'DPutils'
+
+[FormalGrammars]
+checkout = git clone 'git@github.com:choener/FormalGrammars.git' 'FormalGrammars'
+
+[OrderedBits]
+checkout = git clone 'git@github.com:choener/OrderedBits.git' 'OrderedBits'
+
+[PrimitiveArray]
+checkout = git clone 'git@github.com:choener/PrimitiveArray.git' 'PrimitiveArray'
+
