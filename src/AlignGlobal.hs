@@ -18,7 +18,7 @@ import           Text.Printf
 import           Data.Sequence ((|>),Seq,empty)
 import           Data.Foldable (toList)
 
-import           ADP.Fusion.PointL
+import           ADPfusion.PointL
 import           Data.PrimitiveArray as PA hiding (map,toList)
 import           FormalLanguage.CFG
 

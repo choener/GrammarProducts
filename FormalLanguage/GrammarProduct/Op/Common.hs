@@ -6,7 +6,7 @@ import Control.Lens hiding (outside)
 import Data.Set (Set)
 
 import FormalLanguage.CFG.Grammar
-import ADP.Fusion.Core.Term.Epsilon (LocalGlobal(..))
+import ADPfusion.Core.Term.Epsilon (LocalGlobal(..))
 
 
 
