@@ -68,7 +68,7 @@ library
                --
                , ADPfusion          == 0.6.0.*
                , FormalGrammars     == 0.4.0.*
-               , PrimitiveArray     == 0.10.0.*
+               , PrimitiveArray     == 0.10.2.*
   exposed-modules:
     FormalLanguage.GrammarProduct
     FormalLanguage.GrammarProduct.Op
